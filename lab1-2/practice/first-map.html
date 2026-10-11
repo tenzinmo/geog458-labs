@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Part 2 Light globe</title>
+  <!-- Keep the course's CSS and JavaScript library versions identical. -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; }
+    #map { position: absolute; inset: 0; background: #dfe7e1; }
+    #status { position: absolute; z-index: 1; left: 20px; top: 20px; max-width: min(400px, calc(100% - 110px)); padding: 16px; background: white; }
+    #status[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <!-- Mapbox attaches the map canvas to this element. -->
+  <div id="map" aria-label="Part 2 Light globe"></div>
+  <p id="status" role="status">Loading the map…</p>
+  <script>
+    // Public browser token supplied by Mo for this practice stage.
+    const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const statusMessage = document.getElementById('status');
+    if (!publicToken.startsWith('pk.')) {
+      statusMessage.textContent = 'This practice map needs your Mapbox public token. No map has loaded yet.';
+    } else if (typeof mapboxgl === 'undefined') {
+      statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
+    } else {
+      // Catch initialization failures such as unavailable WebGL support.
+      try {
+        mapboxgl.accessToken = publicToken; // Authorize requests with the supplied public token.
+        const mymap = new mapboxgl.Map({
+          container: 'map', // HTML container id.
+          style: 'mapbox://styles/mapbox/light-v11', // Light basemap used in Part 2.
+          projection: 'globe', // Globe projection specified in the starter.
+          center: [-96, 37.8], // Starting longitude, latitude.
+          zoom: 1 // Initial scale for this stage.
+        });
+        mymap.addControl(new mapboxgl.FullscreenControl()); // Enter or leave fullscreen.
+        mymap.addControl(new mapboxgl.NavigationControl()); // Zoom buttons and north compass.
+        mymap.on('load', () => { statusMessage.hidden = true; });
+        mymap.on('error', () => {
+          statusMessage.hidden = false;
+          statusMessage.textContent = 'A map resource failed to load. Check your token, allowed URLs, connection and console.';
+        });
+      } catch (error) {
+        statusMessage.hidden = false;
+        statusMessage.textContent = 'The map could not start. Check browser WebGL support and the console, then reload.';
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

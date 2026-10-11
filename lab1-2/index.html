@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- Declare English and use HTML5 so browsers interpret the document consistently. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capitol Hill street patterns</title>
+  <!-- Matching v3.6.0 CSS and JavaScript implement the course's Mapbox library. -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    /* The map needs an explicit height; the text sits beside it instead of covering it. */
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #24352d; background: #f4f5f0; font: 16px/1.55 system-ui, sans-serif; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; height: 100vh; height: 100svh; }
+    .map-area { position: relative; min-height: 0; }
+    #map { position: absolute; inset: 0; background: #dfe7e1; }
+    aside { padding: 28px 26px; border-left: 1px solid #c7d2ca; overflow-y: auto; }
+    .course { margin: 0 0 12px; color: #526759; font-size: 0.8rem; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { color: #000; margin: 0 0 16px; font-size: 2rem; line-height: 1.12; }
+    h2 { color: #000; margin: 26px 0 8px; font-size: 1.05rem; }
+    p { margin: 0 0 14px; }
+    code { overflow-wrap: anywhere; font-size: .85em; }
+    a { color: #235f42; text-underline-offset: .15em; }
+    .note { color: #526759; font-size: .85rem; }
+    #map-status { position: absolute; z-index: 1; top: 24px; left: 24px; max-width: min(420px, calc(100% - 90px)); margin: 0; padding: 16px 20px; background: #fffdf6; border: 1px solid #b6c5bb; border-radius: 4px; }
+    #map-status[hidden] { display: none; }
+    @media (max-width: 760px) {
+      main { display: block; height: auto; min-height: 100vh; }
+      .map-area { height: 62vh; min-height: 360px; }
+      aside { border-left: 0; border-top: 1px solid #c7d2ca; padding: 24px; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="map-area" aria-label="Interactive map of Capitol Hill in Seattle">
+      <!-- Mapbox inserts its WebGL canvas and controls into this container. -->
+      <div id="map"></div>
+      <p id="map-status" role="status">Loading the map…</p>
+      <noscript>This interactive map requires JavaScript.</noscript>
+    </section>
+    <aside aria-labelledby="map-title">
+      <p class="course">GEOG 458 · Lab 1-2</p>
+      <h1 id="map-title">Capitol Hill<br>street patterns</h1>
+      <p>This map emphasizes Capitol Hill’s street pattern. It retains road labels for orientation while reducing competing place and transit labels.</p>
+      <p class="note">The starting view uses dusk lighting and hides points of interest. Two additional changes shape what the map emphasizes.</p>
+
+      <h2>1. Hide place labels</h2>
+      <p><code>showPlaceLabels: false</code> hides place names, including neighborhood and city labels. This clears space to compare the arrangement of streets and blocks within the area identified by the page title. It is useful for a neighborhood-scale overview, but removes regional context when zooming out.</p>
+
+      <h2>2. Hide transit labels</h2>
+      <p><code>showTransitLabels: false</code> hides transit icons and text. This helps isolate the street pattern for an initial overview of the built environment. The tradeoff is missing information about stops and stations, so these labels should be restored for transit planning or an accessibility study.</p>
+
+      <p class="note">Pan and zoom to explore. The compass resets north; the fullscreen control expands the map. Basemap features come from Mapbox and its data providers. This page does not calculate routes or measure accessibility.</p>
+      <p class="note"><a href="https://docs.mapbox.com/mapbox-gl-js/example/set-config-property/">Mapbox configuration reference</a></p>
+    </aside>
+  </main>
+  <script>
+    // Public browser token supplied by Mo for this coursework map.
+    // Browser tokens are visible in the HTML. Never put a secret sk. token here.
+    const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const statusMessage = document.getElementById('map-status');
+
+    // Keep the unfinished draft readable without sending requests using a fake token.
+    if (!publicToken.startsWith('pk.')) {
+      statusMessage.textContent = 'Map preview is waiting for your Mapbox public token. Add it to the marked line in index.html, then reload. No map has loaded yet.';
+    } else if (typeof mapboxgl === 'undefined') {
+      statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
+    } else {
+      // Catch initialization failures such as unavailable WebGL support.
+      try {
+        // Associate Mapbox requests with the account that issued this public token.
+        mapboxgl.accessToken = publicToken;
+  
+        // Construct one map. container matches the HTML div's id above.
+        const mymap = new mapboxgl.Map({
+          container: 'map',
+          // Part 3 removes the Light style and globe options used in Part 2.
+          // With style omitted, this version of Mapbox GL JS loads Mapbox Standard.
+          // style: 'mapbox://styles/mapbox/light-v11',
+          // projection: 'globe',
+          center: [-122.319, 47.623], // Approximate Capitol Hill center: longitude, latitude.
+          zoom: 14 // Neighborhood scale; a larger number shows a smaller area in more detail.
+        });
+  
+        // Add the browser fullscreen toggle to the map container.
+        mymap.addControl(new mapboxgl.FullscreenControl());
+        // Add plus/minus zoom buttons and a compass that resets map bearing to north.
+        mymap.addControl(new mapboxgl.NavigationControl());
+  
+        // style.load waits until the style is available before changing its configuration.
+        // 'basemap' identifies the imported Standard basemap, not a custom data layer.
+        mymap.on('style.load', () => {
+          // The lab's two baseline settings: dusk light and hidden POI labels.
+          mymap.setConfigProperty('basemap', 'lightPreset', 'dusk');
+          mymap.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+          // Additional change 1: hide regional/place names; explanation is beside the map.
+          mymap.setConfigProperty('basemap', 'showPlaceLabels', false);
+          // Additional change 2: hide transit icons/text; leave road labels at their default.
+          mymap.setConfigProperty('basemap', 'showTransitLabels', false);
+        });
+  
+        // Hide the loading message only after Mapbox reports its initial map load.
+        mymap.on('load', () => { statusMessage.hidden = true; });
+        // Show a useful failure state instead of silently presenting a blank map.
+        mymap.on('error', () => {
+          statusMessage.hidden = false;
+          statusMessage.textContent = 'A map resource could not load. Check the public token, its allowed URLs, your connection, and the browser console.';
+        });
+      } catch (error) {
+        statusMessage.hidden = false;
+        statusMessage.textContent = 'The map could not start. Check browser WebGL support and the console, then reload.';
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
