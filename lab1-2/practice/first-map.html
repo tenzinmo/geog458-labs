@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Part 2 Light globe</title>
-  <!-- Keep the course's CSS and JavaScript library versions identical. -->
+  <!-- Load the matching v3.6.0 JavaScript and CSS files required for this exercise. -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
   <style>
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <!-- Mapbox attaches the map canvas to this element. -->
+  <!-- Leave this container empty so Mapbox can add its canvas here. -->
   <div id="map" aria-label="Part 2 Light globe"></div>
   <p id="status" role="status">Loading the map…</p>
   <script>
-    // Public browser token supplied by Mo for this practice stage.
+    // Public browser token for this practice map. Requests use the account that issued it.
     const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
     const statusMessage = document.getElementById('status');
     if (!publicToken.startsWith('pk.')) {
@@ -27,18 +27,19 @@
     } else if (typeof mapboxgl === 'undefined') {
       statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
     } else {
-      // Catch initialization failures such as unavailable WebGL support.
+      // Show a status message if Mapbox cannot start, for example when WebGL is unavailable.
       try {
-        mapboxgl.accessToken = publicToken; // Authorize requests with the supplied public token.
+        mapboxgl.accessToken = publicToken; // Give Mapbox the public token used to load map resources.
+        // Create one map and set the view that appears when this practice page opens.
         const mymap = new mapboxgl.Map({
-          container: 'map', // HTML container id.
-          style: 'mapbox://styles/mapbox/light-v11', // Light basemap used in Part 2.
-          projection: 'globe', // Globe projection specified in the starter.
-          center: [-96, 37.8], // Starting longitude, latitude.
-          zoom: 1 // Initial scale for this stage.
+          container: 'map', // Match the id of the HTML map container.
+          style: 'mapbox://styles/mapbox/light-v11', // Keep the Light basemap required for Part 2.
+          projection: 'globe', // Display this practice map as a globe.
+          center: [-96, 37.8], // Coordinates use longitude first, then latitude.
+          zoom: 1 // Start with a broad view. A higher zoom value shows less area.
         });
-        mymap.addControl(new mapboxgl.FullscreenControl()); // Enter or leave fullscreen.
-        mymap.addControl(new mapboxgl.NavigationControl()); // Zoom buttons and north compass.
+        mymap.addControl(new mapboxgl.FullscreenControl()); // Let the viewer enter and leave fullscreen.
+        mymap.addControl(new mapboxgl.NavigationControl()); // Add zoom buttons and a compass that resets north.
         mymap.on('load', () => { statusMessage.hidden = true; });
         mymap.on('error', () => {
           statusMessage.hidden = false;

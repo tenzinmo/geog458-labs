@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<!-- Declare English and use HTML5 so browsers interpret the document consistently. -->
+<!-- Use HTML5 and identify the page language as English. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Capitol Hill street patterns</title>
-  <!-- Matching v3.6.0 CSS and JavaScript implement the course's Mapbox library. -->
+  <!-- Load both Mapbox files from v3.6.0. JavaScript provides the map library; CSS styles its controls and layout. -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
   <style>
-    /* The map needs an explicit height; the text sits beside it instead of covering it. */
+    /* Give the map a defined height. Keep the explanation beside it so the text does not cover map features. */
     * { box-sizing: border-box; }
     body { margin: 0; color: #24352d; background: #f4f5f0; font: 16px/1.55 system-ui, sans-serif; }
     main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; height: 100vh; height: 100svh; }
@@ -23,6 +23,15 @@
     code { overflow-wrap: anywhere; font-size: .85em; }
     a { color: #235f42; text-underline-offset: .15em; }
     .note { color: #526759; font-size: .85rem; }
+    .map-tools { min-width: 0; margin: 20px 0; padding: 12px 14px 16px; border: 1px solid #b6c5bb; border-radius: 6px; background: #fffdf6; }
+    .map-tools legend { padding: 0 5px; color: #000; font-weight: 700; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+    .toggle-row input { width: 18px; height: 18px; margin: 0; accent-color: #235f42; }
+    .return-button { width: 100%; margin-top: 10px; padding: 11px 12px; border: 1px solid #235f42; border-radius: 4px; background: #235f42; color: #fff; font: inherit; cursor: pointer; }
+    .return-button:hover { background: #194830; }
+    .map-tools :focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+    .map-tools:disabled { opacity: .6; }
+    .map-tools:disabled label, .map-tools:disabled button { cursor: wait; }
     #map-status { position: absolute; z-index: 1; top: 24px; left: 24px; max-width: min(420px, calc(100% - 90px)); margin: 0; padding: 16px 20px; background: #fffdf6; border: 1px solid #b6c5bb; border-radius: 4px; }
     #map-status[hidden] { display: none; }
     @media (max-width: 760px) {
@@ -35,7 +44,7 @@
 <body>
   <main>
     <section class="map-area" aria-label="Interactive map of Capitol Hill in Seattle">
-      <!-- Mapbox inserts its WebGL canvas and controls into this container. -->
+      <!-- Leave this container empty. Mapbox adds its WebGL canvas and controls here. -->
       <div id="map"></div>
       <p id="map-status" role="status">Loading the map…</p>
       <noscript>This interactive map requires JavaScript.</noscript>
@@ -43,67 +52,109 @@
     <aside aria-labelledby="map-title">
       <p class="course">GEOG 458 · Lab 1-2</p>
       <h1 id="map-title">Capitol Hill<br>street patterns</h1>
-      <p>This map emphasizes Capitol Hill’s street pattern. It retains road labels for orientation while reducing competing place and transit labels.</p>
-      <p class="note">The starting view uses dusk lighting and hides points of interest. Two additional changes shape what the map emphasizes.</p>
+      <p>This map focuses on Capitol Hill’s streets and blocks. Road names stay visible. Use the checkboxes to compare the view with and without place and transit labels.</p>
+      <p class="note">Dusk lighting and hidden points of interest are the lab’s starting settings. Both additional label settings start off; their effects depend on the location and zoom.</p>
+
+      <!-- A disabled fieldset keeps all three controls unavailable until the map style is ready. -->
+      <fieldset id="label-controls" class="map-tools" disabled>
+        <legend>Compare labels</legend>
+        <!-- Without a checked attribute, each checkbox starts off (its checked value is false). -->
+        <label class="toggle-row" for="place-labels">
+          <input id="place-labels" type="checkbox">
+          Show place labels
+        </label>
+        <label class="toggle-row" for="transit-labels">
+          <input id="transit-labels" type="checkbox">
+          Show transit labels
+        </label>
+        <button id="return-to-capitol-hill" class="return-button" type="button">Return to Capitol Hill</button>
+      </fieldset>
 
       <h2>1. Hide place labels</h2>
-      <p><code>showPlaceLabels: false</code> hides place names, including neighborhood and city labels. This clears space to compare the arrangement of streets and blocks within the area identified by the page title. It is useful for a neighborhood-scale overview, but removes regional context when zooming out.</p>
+      <p><code>showPlaceLabels: false</code> hides place-name labels, including neighborhood and city names. Fewer labels can make block shapes easier to compare, but they also remove geographic context. Restore place labels when locating an area within Seattle or exploring an unfamiliar neighborhood.</p>
 
       <h2>2. Hide transit labels</h2>
-      <p><code>showTransitLabels: false</code> hides transit icons and text. This helps isolate the street pattern for an initial overview of the built environment. The tradeoff is missing information about stops and stations, so these labels should be restored for transit planning or an accessibility study.</p>
+      <p><code>showTransitLabels: false</code> hides transit icons and text, keeping the initial view focused on street geometry. Restore these labels when looking for transit. Assessing service or accessibility also requires appropriate transit data; street patterns alone cannot answer those questions.</p>
 
-      <p class="note">Pan and zoom to explore. The compass resets north; the fullscreen control expands the map. Basemap features come from Mapbox and its data providers. This page does not calculate routes or measure accessibility.</p>
+      <p class="note">Pan and zoom to explore. “Return to Capitol Hill” restores the starting view and keeps your label choices. Use the compass to reset north and the fullscreen button to expand the map. Basemap: Mapbox and its data providers. This map does not calculate routes or measure accessibility.</p>
       <p class="note"><a href="https://docs.mapbox.com/mapbox-gl-js/example/set-config-property/">Mapbox configuration reference</a></p>
     </aside>
   </main>
   <script>
-    // Public browser token supplied by Mo for this coursework map.
-    // Browser tokens are visible in the HTML. Never put a secret sk. token here.
+    // Public browser token for this coursework map. It identifies the account used for map requests.
+    // The token is visible in page source. Only a public pk. token belongs in this browser code.
     const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
     const statusMessage = document.getElementById('map-status');
+    // Find the HTML controls so JavaScript can read their values and respond to user input.
+    const labelControls = document.getElementById('label-controls');
+    const placeLabels = document.getElementById('place-labels');
+    const transitLabels = document.getElementById('transit-labels');
+    const returnButton = document.getElementById('return-to-capitol-hill');
 
-    // Keep the unfinished draft readable without sending requests using a fake token.
+    // Check the public-token prefix before making Mapbox requests. Show a message if it is missing.
     if (!publicToken.startsWith('pk.')) {
       statusMessage.textContent = 'Map preview is waiting for your Mapbox public token. Add it to the marked line in index.html, then reload. No map has loaded yet.';
     } else if (typeof mapboxgl === 'undefined') {
       statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
     } else {
-      // Catch initialization failures such as unavailable WebGL support.
+      // Show a status message if Mapbox cannot start, for example when WebGL is unavailable.
       try {
-        // Associate Mapbox requests with the account that issued this public token.
+        // Give the Mapbox library the token it will use to request the style, tiles and fonts.
         mapboxgl.accessToken = publicToken;
   
-        // Construct one map. container matches the HTML div's id above.
+        // Create one Map instance. The container option tells it where to draw the map.
         const mymap = new mapboxgl.Map({
-          container: 'map',
-          // Part 3 removes the Light style and globe options used in Part 2.
-          // With style omitted, this version of Mapbox GL JS loads Mapbox Standard.
+          container: 'map', // Match the id of the empty HTML map container above.
+          // Keep the Part 2 style and projection lines commented out for the Standard map in Part 3.
+          // Omitting style loads Mapbox Standard. The configuration calls below target that basemap.
           // style: 'mapbox://styles/mapbox/light-v11',
           // projection: 'globe',
-          center: [-122.319, 47.623], // Approximate Capitol Hill center: longitude, latitude.
-          zoom: 14 // Neighborhood scale; a larger number shows a smaller area in more detail.
+          center: [-122.319, 47.623], // Begin near Capitol Hill. Coordinates are longitude first, then latitude.
+          zoom: 14 // Begin at neighborhood scale. Higher zoom values show a smaller area.
         });
   
-        // Add the browser fullscreen toggle to the map container.
+        // Let the viewer expand the map container to fullscreen and return to the page.
         mymap.addControl(new mapboxgl.FullscreenControl());
-        // Add plus/minus zoom buttons and a compass that resets map bearing to north.
+        // Add zoom buttons and a compass. The compass resets the map bearing to north.
         mymap.addControl(new mapboxgl.NavigationControl());
   
-        // style.load waits until the style is available before changing its configuration.
-        // 'basemap' identifies the imported Standard basemap, not a custom data layer.
+        // Wait for style.load before changing the style. The configuration is not ready before then.
+        // 'basemap' is the id of the imported Standard basemap whose settings are being changed.
         mymap.on('style.load', () => {
-          // The lab's two baseline settings: dusk light and hidden POI labels.
+          // Apply the lab's baseline: dusk lighting, then hide point-of-interest icons and text.
           mymap.setConfigProperty('basemap', 'lightPreset', 'dusk');
           mymap.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
-          // Additional change 1: hide regional/place names; explanation is beside the map.
-          mymap.setConfigProperty('basemap', 'showPlaceLabels', false);
-          // Additional change 2: hide transit icons/text; leave road labels at their default.
-          mymap.setConfigProperty('basemap', 'showTransitLabels', false);
+          // Each checkbox starts unchecked, so both additional properties begin as false (hidden).
+          // Read the current choices again if the style reloads, keeping the controls and map in agreement.
+          mymap.setConfigProperty('basemap', 'showPlaceLabels', placeLabels.checked);
+          mymap.setConfigProperty('basemap', 'showTransitLabels', transitLabels.checked);
+          // Enable the controls only after the basemap is ready to accept configuration changes.
+          labelControls.disabled = false;
+        });
+
+        // A change event fires when the viewer toggles a checkbox with a mouse, touch, or keyboard.
+        // checked is a Boolean: true shows these labels; false hides them without reloading the map.
+        placeLabels.addEventListener('change', () => {
+          mymap.setConfigProperty('basemap', 'showPlaceLabels', placeLabels.checked);
+        });
+        transitLabels.addEventListener('change', () => {
+          mymap.setConfigProperty('basemap', 'showTransitLabels', transitLabels.checked);
+        });
+
+        // jumpTo changes the camera immediately: restore the center, zoom, north-up bearing and flat pitch.
+        // It does not change the style or checkbox values, so the viewer keeps their label choices.
+        returnButton.addEventListener('click', () => {
+          mymap.jumpTo({
+            center: [-122.319, 47.623],
+            zoom: 14,
+            bearing: 0,
+            pitch: 0
+          });
         });
   
-        // Hide the loading message only after Mapbox reports its initial map load.
+        // Remove the loading message when Mapbox reports that the initial map has loaded.
         mymap.on('load', () => { statusMessage.hidden = true; });
-        // Show a useful failure state instead of silently presenting a blank map.
+        // Make resource failures visible so the viewer has a reason to check the token or connection.
         mymap.on('error', () => {
           statusMessage.hidden = false;
           statusMessage.textContent = 'A map resource could not load. Check the public token, its allowed URLs, your connection, and the browser console.';
