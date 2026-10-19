@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earthquakes, past 30 days | GEOG 458</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #262a27; background: #f8f7f2; font: 15px/1.5 system-ui, sans-serif; }
+    header { padding: 20px 28px 18px; border-bottom: 1px solid #d7d9d0; }
+    .course { margin: 0 0 5px; color: #5b625b; font-size: 11px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3 { color: #000; }
+    h1 { margin: 0 0 7px; font-size: clamp(24px, 3vw, 34px); line-height: 1.15; font-weight: 650; letter-spacing: -.025em; }
+    header p:last-child { max-width: 900px; margin: 0; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 310px; height: calc(100svh - 142px); min-height: 540px; }
+    .map-area { position: relative; min-width: 0; background: #e3e7e3; }
+    #map { position: absolute; inset: 0; }
+    aside { padding: 24px; background: #fffefa; border-left: 1px solid #d7d9d0; overflow: auto; }
+    h2 { margin: 0 0 12px; font-size: 18px; line-height: 1.2; }
+    h3 { margin: 22px 0 8px; font-size: 13px; }
+    p { margin: 0 0 12px; }
+    .note { color: #555e57; font-size: 12px; line-height: 1.5; }
+    a { color: #183f2f; text-underline-offset: 3px; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+    .legend-list { padding: 0; margin: 0 0 10px; list-style: none; }
+    .legend-row { display: flex; align-items: center; gap: 12px; min-height: 32px; }
+    .symbol-space { display: flex; flex: 0 0 80px; justify-content: center; align-items: center; min-height: 44px; }
+    .circle { display: inline-block; flex-shrink: 0; border-radius: 50%; box-sizing: content-box; }
+    .color-key { display: inline-block; width: 13px; height: 13px; border: .6px solid #fff; }
+    .rule { border-top: 1px solid #d7d9d0; margin-top: 20px; padding-top: 18px; }
+    .count { color: #000; font-size: 24px; font-weight: 650; letter-spacing: -.03em; }
+    #map-status { position: absolute; left: 14px; bottom: 36px; right: 50px; z-index: 1; max-width: 460px; margin: 0; padding: 12px 14px; border: 1px solid #c8cfc7; background: #fffefa; font-size: 13px; }
+    #map-status[hidden] { display: none; }
+    .mapboxgl-popup-content { color: #262a27; padding: 16px 18px; font: 14px/1.45 system-ui, sans-serif; }
+    .mapboxgl-popup-content h3 { margin: 0 20px 8px 0; font-size: 17px; }
+    .mapboxgl-popup-content p { margin: 0; }
+    details { margin-top: 16px; }
+    summary { color: #000; cursor: pointer; font-size: 13px; font-weight: 600; }
+    details p { margin-top: 10px; }
+    noscript { display: block; position: relative; padding: 20px; background: #fffefa; }
+    @media (max-width: 760px) {
+      header { padding: 20px; }
+      main { display: block; height: auto; min-height: 0; }
+      .map-area { height: 60svh; min-height: 350px; }
+      aside { border-left: 0; border-top: 1px solid #d7d9d0; padding: 22px; overflow: visible; }
+      .legend-row { max-width: 350px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="course">GEOG 458 · Lab 2-1 · Mo RiGesefal</p>
+    <h1>Earthquakes, past 30 days</h1>
+    <p>A satellite globe of the USGS earthquake feed, with circle size and color showing magnitude.</p>
+  </header>
+  <main>
+    <section class="map-area" aria-label="Interactive globe of earthquakes in the past 30 days">
+      <div id="map"></div>
+      <p id="map-status" role="status">Loading the map and data…</p>
+      <noscript>This interactive map requires JavaScript.</noscript>
+    </section>
+    <aside id="legend" aria-label="Map legend and data notes">
+      <h2>Magnitude</h2>
+      <p class="note">Larger, darker circles indicate greater magnitude. These samples share the map’s radius, color and white outline.</p>
+      <ul id="magnitude-key" class="legend-list" aria-label="Magnitude symbol samples"></ul>
+      <p class="note">Sizes and colors change continuously between the course’s magnitude stops. Circle area does not represent energy released.</p>
+      <div class="rule">
+        <p><strong>Explore the globe</strong><br>Drag to rotate, zoom in, then click a circle for its magnitude and location.</p>
+        <p class="note">Source: <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">USGS Earthquake Hazards Program</a>, all earthquakes in the past 30 days.</p>
+        <p class="note">The page loads a snapshot of the feed. Reload to request newer data.</p>
+      </div>
+      <details>
+        <summary>How to read the smallest circles</summary>
+        <p class="note">Magnitudes at or below 1 use the smallest symbol. A missing magnitude uses the same styling fallback, but its popup says “unavailable.” Negative magnitudes are retained.</p>
+      </details>
+    </aside>
+  </main>
+  <script>
+    // Reuse the public Mapbox token from Lab 1.
+    const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const statusMessage = document.getElementById('map-status');
+
+    // Keep the course's interpolation stops for both the map and DOM legend.
+    // These are graduated radii, not population-style proportional areas.
+    const magnitudeStops = [1, 1.5, 2, 2.5, 3, 3.5, 4.5, 6.5, 8.5, 10.5];
+    const radii = [0.7, 2, 4, 5, 6, 7, 9, 15, 17, 20];
+    const colors = ['#fff7ec', '#fee8c8', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#b30000', '#7f0000', '#000000'];
+    const magnitude = ['to-number', ['get', 'mag'], 0];
+    const radiusExpression = ['interpolate', ['linear'], magnitude];
+    const colorExpression = ['interpolate', ['linear'], magnitude];
+    magnitudeStops.forEach((value, i) => {
+      radiusExpression.push(value, radii[i]);
+      colorExpression.push(value, colors[i]);
+    });
+
+    // CSS width/height are diameters; Mapbox uses a radius in pixels.
+    [2, 4.5, 8.5].forEach((value) => {
+      const i = magnitudeStops.indexOf(value);
+      const row = document.createElement('li');
+      row.className = 'legend-row';
+      const space = document.createElement('span');
+      space.className = 'symbol-space';
+      const symbol = document.createElement('span');
+      symbol.className = 'circle';
+      symbol.setAttribute('aria-hidden', 'true');
+      symbol.style.cssText = `width:${2 * radii[i]}px;height:${2 * radii[i]}px;background:${colors[i]};border:1px solid white;`;
+      space.appendChild(symbol);
+      const label = document.createElement('span');
+      label.textContent = `Magnitude ${value}`;
+      row.append(space, label);
+      document.getElementById('magnitude-key').appendChild(row);
+    });
+
+    if (typeof mapboxgl === 'undefined') {
+      statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
+    } else {
+      mapboxgl.accessToken = publicToken;
+      const mymap = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/satellite-v9',
+        projection: 'globe',
+        center: [-96, 37.8],
+        zoom: 1
+      });
+      mymap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      mymap.on('style.load', () => {
+        mymap.setFog({});
+      });
+
+      // Keep load separate from style.load. Load the current feed at runtime.
+      mymap.on('load', () => {
+        mymap.addSource('earthquakes', {
+          type: 'geojson',
+          data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson'
+        });
+        mymap.addLayer({
+          id: 'earthquakes-layer',
+          type: 'circle',
+          source: 'earthquakes',
+          paint: {
+            'circle-radius': radiusExpression,
+            'circle-color': colorExpression,
+            'circle-opacity': 1,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1,
+            'circle-stroke-opacity': 1
+          }
+        });
+        mymap.on('click', 'earthquakes-layer', (event) => {
+          const feature = event.features[0];
+          const properties = feature.properties;
+          const content = document.createElement('div');
+          const title = document.createElement('h3');
+          title.textContent = properties.mag === null || properties.mag === undefined ? 'Magnitude unavailable' : `Magnitude ${properties.mag}`;
+          const location = document.createElement('p');
+          location.textContent = properties.place || 'Location description unavailable';
+          content.append(title, location);
+          // Text nodes keep external feature text from becoming HTML markup.
+          new mapboxgl.Popup().setLngLat(feature.geometry.coordinates.slice(0, 2)).setDOMContent(content).addTo(mymap);
+        });
+        mymap.on('mouseenter', 'earthquakes-layer', () => { mymap.getCanvas().style.cursor = 'pointer'; });
+        mymap.on('mouseleave', 'earthquakes-layer', () => { mymap.getCanvas().style.cursor = ''; });
+      });
+      mymap.on('sourcedata', (event) => {
+        if (event.sourceId === 'earthquakes' && event.isSourceLoaded) statusMessage.hidden = true;
+      });
+      mymap.on('error', () => {
+        statusMessage.hidden = false;
+        statusMessage.textContent = 'A map resource could not load. Check the connection, then reload.';
+      });
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Megacities in a world of smaller places | GEOG 458</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #262a27; background: #f8f7f2; font: 15px/1.5 system-ui, sans-serif; }
+    header { padding: 20px 28px 18px; border-bottom: 1px solid #d7d9d0; }
+    .course { margin: 0 0 5px; color: #5b625b; font-size: 11px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3 { color: #000; }
+    h1 { margin: 0 0 7px; font-size: clamp(24px, 3vw, 34px); line-height: 1.15; font-weight: 650; letter-spacing: -.025em; }
+    header p:last-child { max-width: 900px; margin: 0; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 310px; height: calc(100svh - 142px); min-height: 540px; }
+    .map-area { position: relative; min-width: 0; background: #e3e7e3; }
+    #map { position: absolute; inset: 0; }
+    aside { padding: 24px; background: #fffefa; border-left: 1px solid #d7d9d0; overflow: auto; }
+    h2 { margin: 0 0 12px; font-size: 18px; line-height: 1.2; }
+    h3 { margin: 22px 0 8px; font-size: 13px; }
+    p { margin: 0 0 12px; }
+    .note { color: #555e57; font-size: 12px; line-height: 1.5; }
+    a { color: #183f2f; text-underline-offset: 3px; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+    .legend-list { padding: 0; margin: 0 0 10px; list-style: none; }
+    .legend-row { display: flex; align-items: center; gap: 12px; min-height: 32px; }
+    .symbol-space { display: flex; flex: 0 0 80px; justify-content: center; align-items: center; min-height: 44px; }
+    .circle { display: inline-block; flex-shrink: 0; border-radius: 50%; box-sizing: content-box; }
+    .color-key { display: inline-block; width: 13px; height: 13px; border: .6px solid #fff; }
+    .rule { border-top: 1px solid #d7d9d0; margin-top: 20px; padding-top: 18px; }
+    .count { color: #000; font-size: 24px; font-weight: 650; letter-spacing: -.03em; }
+    #map-status { position: absolute; left: 14px; bottom: 36px; right: 50px; z-index: 1; max-width: 460px; margin: 0; padding: 12px 14px; border: 1px solid #c8cfc7; background: #fffefa; font-size: 13px; }
+    #map-status[hidden] { display: none; }
+    .mapboxgl-popup-content { color: #262a27; padding: 16px 18px; font: 14px/1.45 system-ui, sans-serif; }
+    .mapboxgl-popup-content h3 { margin: 0 20px 8px 0; font-size: 17px; }
+    .mapboxgl-popup-content p { margin: 0; }
+    details { margin-top: 16px; }
+    summary { color: #000; cursor: pointer; font-size: 13px; font-weight: 600; }
+    details p { margin-top: 10px; }
+    noscript { display: block; position: relative; padding: 20px; background: #fffefa; }
+    @media (max-width: 760px) {
+      header { padding: 20px; }
+      main { display: block; height: auto; min-height: 0; }
+      .map-area { height: 60svh; min-height: 350px; }
+      aside { border-left: 0; border-top: 1px solid #d7d9d0; padding: 22px; overflow: visible; }
+      .legend-row { max-width: 350px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="course">GEOG 458 · Lab 2-2 · Mo RiGesefal</p>
+    <h1>Megacities in a world of smaller places</h1>
+    <p>A few very large population estimates stand out among thousands of smaller city records.</p>
+  </header>
+  <main>
+    <section class="map-area" aria-label="Interactive map of all supplied world city population records">
+      <div id="map"></div>
+      <p id="map-status" role="status">Loading the map and data…</p>
+      <noscript>This interactive map requires JavaScript.</noscript>
+    </section>
+    <aside id="legend" aria-label="Map legend and data notes">
+      <h2>Population in the supplied data</h2>
+      <p class="note">All 19,321 city records are included. Zoom in to separate overlapping circles.</p>
+      <h3>Color · population group</h3>
+      <ul id="population-colors" class="legend-list" aria-label="Population color classes"></ul>
+      <h3>Circle area · population estimate</h3>
+      <ul id="population-sizes" class="legend-list" aria-label="Proportional population symbol samples"></ul>
+      <p class="note">Twice the population gives twice the filled circle area. Symbol sizes stay the same as you zoom.</p>
+      <div class="rule">
+        <p><span class="count">10</span> entries at 10 million or more</p>
+        <p class="note">The darkest class highlights the dataset’s largest estimates. Click a city to read its name and recorded population.</p>
+      </div>
+      <details open>
+        <summary>Data notes and source</summary>
+        <p class="note">These are estimates in the supplied course file, not current official populations. The file gives no population reference year or boundary definition. Delhi and New Delhi have separate records with the same estimate; entries need not represent distinct urban areas.</p>
+        <p class="note">All supplied population values are positive. A hollow gray marker is reserved for zero or missing values; none occur in this file.</p>
+        <p class="note">Source: <a href="https://canvas.uw.edu/courses/1918791/files/152783079?wrap=1">GEOG 458 world-cities.geojson</a>. The assignment credits <a href="https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-populated-places/">Natural Earth</a>.</p>
+      </details>
+    </aside>
+  </main>
+  <script>
+    // Reuse the public Mapbox token from Lab 1.
+    const publicToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const statusMessage = document.getElementById('map-status');
+
+    // Verified fields: accentcity (display name), population (integer).
+    // Manual breaks make the theme legible: smaller places (<100,000),
+    // midsize (100,000–<1 million), large (1–<10 million), and megacity
+    // entries (>=10 million). These are interpretive groups, not quantiles.
+    // A light-to-dark green sequence communicates increasing population;
+    // the darkest class emphasizes the 10-million threshold without hiding
+    // any other records. Light-v11 provides quiet geographic context.
+    const breaks = [100000, 1000000, 10000000];
+    const colors = ['#9ab6a4', '#559273', '#266447', '#113a2b'];
+    const labels = ['Below 100,000', '100,000 to below 1 million', '1 million to below 10 million', '10 million or more'];
+    const population = ['to-number', ['get', 'population'], 0];
+    const colorExpression = ['step', population, colors[0], breaks[0], colors[1], breaks[1], colors[2], breaks[2], colors[3]];
+
+    // r = 6 sqrt(population / 1,000,000), so filled area = pi*36*P/1,000,000.
+    // No minimum or maximum clamp is applied to positive populations:
+    // every positive record retains the same exact area-to-population ratio.
+    // A small white outline separates overlapping symbols and is not data.
+    // Zero/missing/nonpositive values use a hollow 3px marker, not a claim
+    // of zero residents. The inspected file contains no such values.
+    const radiusExpression = ['case', ['>', population, 0], ['*', 6, ['sqrt', ['/', population, 1000000]]], 3];
+    function radiusFor(value) { return 6 * Math.sqrt(value / 1000000); }
+    function colorFor(value) { return colors[breaks.filter((stop) => value >= stop).length]; }
+
+    labels.forEach((label, i) => {
+      const row = document.createElement('li');
+      row.className = 'legend-row';
+      const swatch = document.createElement('span');
+      swatch.className = 'color-key';
+      swatch.setAttribute('aria-hidden', 'true');
+      swatch.style.background = colors[i];
+      const text = document.createElement('span');
+      text.textContent = label;
+      row.append(swatch, text);
+      document.getElementById('population-colors').appendChild(row);
+    });
+    [100000, 1000000, 10000000].forEach((value) => {
+      const row = document.createElement('li');
+      row.className = 'legend-row';
+      const space = document.createElement('span');
+      space.className = 'symbol-space';
+      const symbol = document.createElement('span');
+      symbol.className = 'circle';
+      symbol.setAttribute('aria-hidden', 'true');
+      symbol.style.cssText = `width:${2 * radiusFor(value)}px;height:${2 * radiusFor(value)}px;background:${colorFor(value)};border:0.6px solid white;`;
+      space.appendChild(symbol);
+      const label = document.createElement('span');
+      label.textContent = value.toLocaleString('en-US');
+      row.append(space, label);
+      document.getElementById('population-sizes').appendChild(row);
+    });
+
+    if (typeof mapboxgl === 'undefined') {
+      statusMessage.textContent = 'The map library could not load. Check your connection and reload.';
+    } else {
+      mapboxgl.accessToken = publicToken;
+      const mymap = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        projection: 'mercator',
+        center: [20, 20],
+        zoom: 1.2,
+        renderWorldCopies: false
+      });
+      mymap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      mymap.on('load', () => {
+        mymap.addSource('population', {
+          type: 'geojson',
+          data: 'data/world-cities.geojson'
+        });
+        mymap.addLayer({
+          id: 'population-layer',
+          type: 'circle',
+          source: 'population',
+          // Draw larger records last. All 19,321 features remain in the layer:
+          // no filter, clustering, top-ten selection, or data removal.
+          layout: { 'circle-sort-key': population },
+          paint: {
+            'circle-radius': radiusExpression,
+            'circle-color': ['case', ['>', population, 0], colorExpression, '#ffffff'],
+            'circle-opacity': 1,
+            'circle-stroke-width': 0.6,
+            'circle-stroke-color': ['case', ['>', population, 0], '#ffffff', '#666666'],
+            'circle-stroke-opacity': 1
+          }
+        });
+        mymap.on('click', 'population-layer', (event) => {
+          const feature = event.features[0];
+          const properties = feature.properties;
+          const content = document.createElement('div');
+          const title = document.createElement('h3');
+          title.textContent = properties.accentcity || properties.city || 'Unnamed city';
+          const text = document.createElement('p');
+          const raw = properties.population;
+          const value = Number(raw);
+          if (raw === null || raw === undefined || !Number.isFinite(value)) {
+            text.textContent = 'Population estimate: not supplied';
+          } else if (value <= 0) {
+            text.textContent = `Recorded population: ${value.toLocaleString('en-US')} (not treated as no residents)`;
+          } else {
+            text.textContent = `Population estimate: ${value.toLocaleString('en-US')}`;
+          }
+          const note = document.createElement('p');
+          note.className = 'note';
+          note.textContent = 'Supplied dataset; reference year unspecified.';
+          content.append(title, text, note);
+          new mapboxgl.Popup().setLngLat(feature.geometry.coordinates.slice(0, 2)).setDOMContent(content).addTo(mymap);
+        });
+        mymap.on('mouseenter', 'population-layer', () => { mymap.getCanvas().style.cursor = 'pointer'; });
+        mymap.on('mouseleave', 'population-layer', () => { mymap.getCanvas().style.cursor = ''; });
+      });
+      mymap.on('sourcedata', (event) => {
+        if (event.sourceId === 'population' && event.isSourceLoaded) statusMessage.hidden = true;
+      });
+      mymap.on('error', () => {
+        statusMessage.hidden = false;
+        statusMessage.textContent = 'A map resource could not load. Check the connection and local data path, then reload.';
+      });
+    }
+
+  </script>
+</body>
+</html>
