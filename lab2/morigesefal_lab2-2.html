@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Megacities in a world of smaller places | GEOG 458</title>
+  <title>World cities and megacities | GEOG 458</title>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
   <style>
@@ -52,8 +52,8 @@
 <body>
   <header>
     <p class="course">GEOG 458 · Lab 2-2 · Mo RiGesefal</p>
-    <h1>Megacities in a world of smaller places</h1>
-    <p>A few very large population estimates stand out among thousands of smaller city records.</p>
+    <h1>World cities and megacities</h1>
+    <p>Cities with populations of 10 million or more appear darkest.</p>
   </header>
   <main>
     <section class="map-area" aria-label="Interactive map of all supplied world city population records">
@@ -61,24 +61,17 @@
       <p id="map-status" role="status">Loading the map and data…</p>
       <noscript>This interactive map requires JavaScript.</noscript>
     </section>
-    <aside id="legend" aria-label="Map legend and data notes">
-      <h2>Population in the supplied data</h2>
-      <p class="note">All 19,321 city records are included. Zoom in to separate overlapping circles.</p>
-      <h3>Color · population group</h3>
+    <aside id="legend" aria-label="Map legend">
+      <h2>Population</h2>
+      <h3>Color</h3>
       <ul id="population-colors" class="legend-list" aria-label="Population color classes"></ul>
-      <h3>Circle area · population estimate</h3>
+      <h3>Circle size</h3>
       <ul id="population-sizes" class="legend-list" aria-label="Proportional population symbol samples"></ul>
-      <p class="note">Twice the population gives twice the filled circle area. Symbol sizes stay the same as you zoom.</p>
+      <p class="note">Circle area represents population.</p>
       <div class="rule">
-        <p><span class="count">10</span> entries at 10 million or more</p>
-        <p class="note">The darkest class highlights the dataset’s largest estimates. Click a city to read its name and recorded population.</p>
+        <p>Click a city for its name and population.</p>
+        <p class="note">Source: <a href="https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-populated-places/">Natural Earth</a> · <a href="https://canvas.uw.edu/courses/1918791/files/152783079?wrap=1">Course dataset</a></p>
       </div>
-      <details open>
-        <summary>Data notes and source</summary>
-        <p class="note">These are estimates in the supplied course file, not current official populations. The file gives no population reference year or boundary definition. Delhi and New Delhi have separate records with the same estimate; entries need not represent distinct urban areas.</p>
-        <p class="note">All supplied population values are positive. A hollow gray marker is reserved for zero or missing values; none occur in this file.</p>
-        <p class="note">Source: <a href="https://canvas.uw.edu/courses/1918791/files/152783079?wrap=1">GEOG 458 world-cities.geojson</a>. The assignment credits <a href="https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-populated-places/">Natural Earth</a>.</p>
-      </details>
     </aside>
   </main>
   <script>
@@ -187,10 +180,7 @@
           } else {
             text.textContent = `Population estimate: ${value.toLocaleString('en-US')}`;
           }
-          const note = document.createElement('p');
-          note.className = 'note';
-          note.textContent = 'Supplied dataset; reference year unspecified.';
-          content.append(title, text, note);
+          content.append(title, text);
           new mapboxgl.Popup().setLngLat(feature.geometry.coordinates.slice(0, 2)).setDOMContent(content).addTo(mymap);
         });
         mymap.on('mouseenter', 'population-layer', () => { mymap.getCanvas().style.cursor = 'pointer'; });

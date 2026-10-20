@@ -53,7 +53,7 @@
   <header>
     <p class="course">GEOG 458 · Lab 2-1 · Mo RiGesefal</p>
     <h1>Earthquakes, past 30 days</h1>
-    <p>A satellite globe of the USGS earthquake feed, with circle size and color showing magnitude.</p>
+    <p>Larger, darker circles show stronger earthquakes.</p>
   </header>
   <main>
     <section class="map-area" aria-label="Interactive globe of earthquakes in the past 30 days">
@@ -61,20 +61,13 @@
       <p id="map-status" role="status">Loading the map and data…</p>
       <noscript>This interactive map requires JavaScript.</noscript>
     </section>
-    <aside id="legend" aria-label="Map legend and data notes">
+    <aside id="legend" aria-label="Map legend">
       <h2>Magnitude</h2>
-      <p class="note">Larger, darker circles indicate greater magnitude. These samples share the map’s radius, color and white outline.</p>
       <ul id="magnitude-key" class="legend-list" aria-label="Magnitude symbol samples"></ul>
-      <p class="note">Sizes and colors change continuously between the course’s magnitude stops. Circle area does not represent energy released.</p>
       <div class="rule">
-        <p><strong>Explore the globe</strong><br>Drag to rotate, zoom in, then click a circle for its magnitude and location.</p>
-        <p class="note">Source: <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">USGS Earthquake Hazards Program</a>, all earthquakes in the past 30 days.</p>
-        <p class="note">The page loads a snapshot of the feed. Reload to request newer data.</p>
+        <p>Drag to rotate. Click a circle for details.</p>
+        <p class="note">Source: <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">USGS</a> · Past 30 days</p>
       </div>
-      <details>
-        <summary>How to read the smallest circles</summary>
-        <p class="note">Magnitudes at or below 1 use the smallest symbol. A missing magnitude uses the same styling fallback, but its popup says “unavailable.” Negative magnitudes are retained.</p>
-      </details>
     </aside>
   </main>
   <script>
