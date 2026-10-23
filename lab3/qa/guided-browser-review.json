@@ -1,0 +1,21 @@
+{
+  "checked_on": "2026-10-23",
+  "stage": "partial pass; required Mapbox basemap absent",
+  "browser": "Chrome",
+  "url": "http://127.0.0.1:8766/morigesefal_lab3-1.html",
+  "checks": {
+    "actual_pngs_and_station_geojson": "Loaded over local HTTP with 200 responses; no map data requested from Mapbox",
+    "geographic_alignment": "All eleven stations align with the rendered projected point extent; northern Marysville high-value area and southern Tacoma low-value area match observations",
+    "direct_point_click": "Marysville 12.1 µg/m³, 2025-07-05, ID 53-061-1007, 24-HR BLK AVG",
+    "station_selector": "Seattle-10th & Weller 9.2 µg/m³, ID 53-033-0030; Tacoma-Alexander 4.1 µg/m³, ID 53-053-0031; values/date/units match original source",
+    "surface_toggle": "Hides actual raster and matching legend; restores both when checked",
+    "station_toggle": "Hides points and closes popup; selecting station restores points",
+    "reset": "Show study area restores full extent and clears selection/popup",
+    "desktop": "Full study-area view, black headings, readable controls, units and continuous legend",
+    "mobile": "390x844 iframe; narrow layout and scrollable controls/legend inspected; full study area fit in minimum-height map pane",
+    "browser_warning_error_logs": [],
+    "expected_missing_resource": "Required basemap availability HEAD probe returns 404; explicit incomplete banner retained"
+  },
+  "limitations": ["No combined basemap/thematic contrast test until Mapbox export is resolved", "Mobile check used an iframe, not physical-phone touch input", "No publication or submission verification yet"],
+  "screenshots": ["guided-browser-overview.png", "guided-browser-popup.png", "guided-browser-mobile.png"]
+}

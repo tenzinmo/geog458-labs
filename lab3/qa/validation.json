@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "numeric_raster_samples_checked": 2000,
+  "numeric_raster_samples_matched": 2000,
+  "all_pngs_valid_crc_and_256px": 96,
+  "xyz_grid": {
+    "8": {
+      "tile_count": 2,
+      "x_min": 40,
+      "x_max": 41,
+      "y_min": 89,
+      "y_max": 89
+    },
+    "9": {
+      "tile_count": 4,
+      "x_min": 81,
+      "x_max": 82,
+      "y_min": 178,
+      "y_max": 179
+    },
+    "10": {
+      "tile_count": 4,
+      "x_min": 163,
+      "x_max": 164,
+      "y_min": 357,
+      "y_max": 358
+    },
+    "11": {
+      "tile_count": 6,
+      "x_min": 327,
+      "x_max": 328,
+      "y_min": 714,
+      "y_max": 716
+    },
+    "12": {
+      "tile_count": 20,
+      "x_min": 654,
+      "x_max": 657,
+      "y_min": 1428,
+      "y_max": 1432
+    },
+    "13": {
+      "tile_count": 60,
+      "x_min": 1309,
+      "x_max": 1314,
+      "y_min": 2856,
+      "y_max": 2865
+    }
+  },
+  "transparent_pixels": 4545624,
+  "nontransparent_pixels": 1745832,
+  "fully_transparent_tiles": 26,
+  "park_feature_count": 512,
+  "all_parks_within_export_bounds": true,
+  "parks_without_canopy_value": 30,
+  "source_count_and_denominator_checks": "See retrieval.json and denominator-validation.json",
+  "browser_interactions_tested": false,
+  "required_mapbox_basemap_present": false,
+  "published": false,
+  "submitted": false
+}

@@ -1,0 +1,134 @@
+{
+  "created_utc": "2026-10-23T08:16:05.578863+00:00",
+  "status": "thematic output generated; maps and basemaps still require completion and review",
+  "source_validation": {
+    "station_count": 11,
+    "unique_station_ids": 11,
+    "date": "2025-07-05",
+    "units": "\u00b5g/m\u00b3",
+    "range": [
+      4.1,
+      12.1
+    ],
+    "csv_geojson_agree": true,
+    "source_files": {
+      "pm25_puget_sound_2025-07-05.csv": {
+        "bytes": 1298,
+        "sha256": "214ed51f485bbd879673d39ccffce360e634ada850942e311c994b7c7dd8bf3d"
+      },
+      "pm25_stations.geojson": {
+        "bytes": 5689,
+        "sha256": "43d815aa78c25e54af14387dad33a12e9f7bac3783151f9cb824e3addd439cee"
+      },
+      "pm25_source.json": {
+        "bytes": 1262,
+        "sha256": "860134531b0e23f1e181ee7f748745986f6d24fe88724791b465e2ea5d3ac66a"
+      },
+      "README.md": {
+        "bytes": 1462,
+        "sha256": "31e014f41c789476b0f8c8e455b926b901de630606e3561f420f5b594ec2f540"
+      }
+    },
+    "limitations": [
+      "Schema and cross-file agreement do not independently authenticate the downloaded source. Read pm25_source.json and the supplied README."
+    ]
+  },
+  "runtime": {
+    "qgis": "3.44.15-Solothurn",
+    "gdal": "GDAL 3.13.3 \"Iowa City\", released 2026/08/13",
+    "QMetaTiles_import": true,
+    "algorithms": {
+      "qgis:idwinterpolation": true,
+      "native:reprojectlayer": true
+    },
+    "crs": {
+      "EPSG:4326": true,
+      "EPSG:32610": true,
+      "EPSG:3857": true
+    }
+  },
+  "processing": {
+    "algorithm": "qgis:idwinterpolation",
+    "source_crs": "EPSG:4326",
+    "distance_crs": "EPSG:32610",
+    "power": 2,
+    "requested_pixel_size_m": 250,
+    "actual_pixel_size_m": [
+      249.79640512819213,
+      249.72845345245582
+    ],
+    "extent_utm10": [
+      528012.572947374,
+      5226024.210614731,
+      561735.0876396799,
+      5322669.122100831
+    ],
+    "numeric_raster_minmax": [
+      4.100431442260742,
+      12.099278450012207
+    ],
+    "nodata": -9999.0
+  },
+  "rendering": {
+    "ramp": [
+      [
+        4.0,
+        "#ffffb2"
+      ],
+      [
+        6.5,
+        "#fecc5c"
+      ],
+      [
+        9.0,
+        "#fd8d3c"
+      ],
+      [
+        11.5,
+        "#f03b20"
+      ],
+      [
+        14.0,
+        "#bd0026"
+      ]
+    ],
+    "interpolation": "linear continuous",
+    "display_opacity_in_html": 0.7,
+    "exported_only": "thematic raster",
+    "background_transparency": 100
+  },
+  "tiles": {
+    "folder": "web/assets/pm25-guided",
+    "crs": "EPSG:3857",
+    "scheme": "xyz",
+    "tile_size": 256,
+    "format": "PNG",
+    "png_quality_setting": 0,
+    "bounds_wgs84": [
+      -122.75,
+      47.1,
+      -122.05,
+      48.15
+    ],
+    "minzoom": 8,
+    "maxzoom": 12,
+    "counts_by_zoom": {
+      "10": 15,
+      "11": 50,
+      "12": 171,
+      "8": 4,
+      "9": 6
+    },
+    "sampled_tiles_with_data": 140,
+    "sampled_tiles_with_transparency": 180,
+    "exporter": "QMetaTiles 1.5 TileSet"
+  },
+  "remaining": [
+    "Browser and geographic alignment QA",
+    "Mo review and understanding",
+    "Mapbox source-use permission and two basemap designs/exports",
+    "Independent map",
+    "README screenshots",
+    "Approval before publication/submission"
+  ]
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Seattle Tree Canopy & Parks | Mo RiGesefal</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; color:#202921; font:15px/1.5 Arial,sans-serif; background:#f5f5ef; }
+    main { display:grid; grid-template-columns:320px 1fr; height:100dvh; }
+    #panel { padding:24px 22px; overflow:auto; border-right:1px solid #d6ddd2; z-index:1; }
+    h1,h2,h3,h4,h5,h6 { color:#000000; }
+    h1 { font-size:26px; line-height:1.15; margin:6px 0 14px; }
+    h2 { font-size:15px; margin:18px 0 6px; }
+    p { margin:10px 0; }
+    .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+    .small { font-size:12px; }
+    .rule { border-top:1px solid #c9d3c5; margin:18px 0; }
+    #map { position:relative; min-width:0; min-height:0; }
+    #status { font-size:12px; border-left:3px solid #b76b15; padding-left:10px; }
+    .row { display:flex; align-items:center; gap:9px; margin:5px 0; font-size:13px; }
+    .swatch { width:26px; height:15px; border:1px solid #657761; flex:none; }
+    .dot { width:11px; height:11px; border-radius:50%; background:#7a2948; border:1px solid #fff; box-shadow:0 0 0 1px #3b2430; margin:0 7px; }
+    label { display:block; margin:8px 0; }
+    input { accent-color:#146335; }
+    #panel select,#panel button { font:inherit; width:100%; padding:7px; border:1px solid #6b7b69; border-radius:4px; background:#fff; color:#202921; }
+    #panel button { cursor:pointer; margin-top:7px; }
+    a { color:#265b35; text-underline-offset:2px; }
+    summary { cursor:pointer; font-weight:bold; color:#000; }
+    .maplibregl-popup-content { font:13px/1.5 Arial,sans-serif; padding:14px; }
+    .maplibregl-popup-content h2 { margin:0 0 7px; }
+    @media(max-width:680px) {
+      main { grid-template-columns:1fr; grid-template-rows:minmax(270px,43dvh) 1fr; }
+      #panel { padding:14px 18px; border-right:0; border-bottom:1px solid #d6ddd2; }
+      h1 { font-size:22px; }
+      #map { min-height:50dvh; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <aside id="panel" aria-label="Map explanation and controls">
+    <div class="eyebrow">GEOG 458 · Lab 3 · Mo RiGesefal</div>
+    <h1>Seattle tree canopy<br>& parks</h1>
+    <p>Explore canopy patterns around places that matter to you. Choose a park or click a point to see its surrounding block group’s 2021 estimate.</p>
+    <p id="status" role="status">Loading map and checking the required local basemap…</p>
+    <label for="park-select"><strong>Go to a park</strong></label>
+    <select id="park-select" disabled><option value="">Choose a park…</option></select>
+    <button id="reset" type="button">Show Seattle</button>
+    <div class="rule"></div>
+    <label><input id="show-canopy" type="checkbox" checked> Show canopy raster</label>
+    <label><input id="show-parks" type="checkbox" checked> Show park centroids</label>
+    <h2>Tree canopy in 2021</h2>
+    <p class="small">Percent of land area in each census block group</p>
+    <div class="row"><span class="swatch" style="background:#edf8e9"></span>0–10%</div>
+    <div class="row"><span class="swatch" style="background:#bae4b3"></span>More than 10–20%</div>
+    <div class="row"><span class="swatch" style="background:#74c476"></span>More than 20–30%</div>
+    <div class="row"><span class="swatch" style="background:#31a354"></span>More than 30–40%</div>
+    <div class="row"><span class="swatch" style="background:#006d2c"></span>More than 40–100%</div>
+    <div class="row"><span class="dot"></span>Park centroid · click for details</div>
+    <p class="small">No canopy data is drawn outside the source polygons. Each block group has one value; the colored pixels are not individual tree locations.</p>
+    <details>
+      <summary>Sources & interpretation</summary>
+      <p class="small">Canopy: University of Vermont Spatial Analysis Laboratory / City of Seattle, 2021 assessment. Parks: Seattle Parks and Recreation inventory, retrieved October 23, 2026.</p>
+      <p class="small">This is a historical, area-level comparison for residents exploring Seattle’s urban environment. It does not measure present shade, public access, or canopy within a park. Park points are centroids, not entrances.</p>
+      <p class="small">The canopy classification was manually reviewed; source metadata reports no formal accuracy assessment. A 20 m raster cell is a display choice, not a claim of measurement accuracy.</p>
+      <p class="small"><a href="https://www.arcgis.com/home/item.html?id=c647921426ed423ca79b0703c0b855be">Canopy source & terms</a> · <a href="https://www.arcgis.com/home/item.html?id=9baab63b52df417a9b2a168e3f288b1b">Parks source & terms</a> · <a href="README-independent.md">Method & limits</a></p>
+      <p class="small">Basemap © Mapbox © OpenStreetMap contributors. Canopy and park data credits remain with their publishers.</p>
+    </details>
+  </aside>
+  <div id="map" aria-label="Interactive Seattle canopy and parks map"></div>
+</main>
+<script type="module">
+  import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+  const status=document.getElementById('status');
+  const studyArea=[[-122.46,47.48],[-122.22,47.75]];
+  const mapContainer=document.getElementById('map');
+  function overviewPadding() {
+    // The sidebar occupies its own grid cell. Use this map's actual size so
+    // fitting works on both the desktop and the stacked mobile layout.
+    const size=mapContainer.getBoundingClientRect();
+    const inset=Math.max(18,Math.min(40,Math.min(size.width,size.height)*0.06));
+    // Reserve room for the wrapped attribution on narrow screens.
+    return {top:inset,bottom:inset+(size.width<=680?100:0),left:inset,right:inset};
+  }
+  const map=new maplibregl.Map({
+    container:'map',
+    style:{version:8,sources:{},layers:[{id:'background',type:'background',paint:{'background-color':'#e9ede9'}}]},
+    bounds:studyArea,fitBoundsOptions:{padding:overviewPadding(),duration:0},minZoom:8,maxZoom:13
+  });
+  let overviewActive=true;
+  function showSeattle(duration=0) {
+    overviewActive=true;
+    map.fitBounds(studyArea,{padding:overviewPadding(),duration});
+  }
+  // Exact raster source bounds below limit tile requests. A camera maxBounds
+  // equal to this tall rectangle would crop it on a wide viewport.
+  map.on('resize',()=>{if(overviewActive)showSeattle(0);});
+  map.on('dragstart',()=>{overviewActive=false;});
+  map.on('zoomstart',event=>{if(event.originalEvent)overviewActive=false;});
+  map.addControl(new maplibregl.NavigationControl());
+  map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
+  let popup;
+  let loadError=false;
+  map.on('error',event=>{
+    loadError=true;
+    status.textContent='A map resource did not load. Check local PNG and GeoJSON paths before using this map.';
+    console.error(event.error);
+  });
+  function showPark(feature) {
+    const p=feature.properties;
+    const box=document.createElement('div');
+    const heading=document.createElement('h2');heading.textContent=p.name;box.append(heading);
+    const value=document.createElement('p');
+    value.textContent=p.block_group_canopy_pct_2021===null || p.block_group_canopy_pct_2021===undefined
+      ? 'No containing canopy block group: no estimate assigned.'
+      : `Surrounding block-group canopy (2021): ${Number(p.block_group_canopy_pct_2021).toFixed(1)}% of land area.`;
+    box.append(value);
+    if(p.block_group) { const id=document.createElement('p');id.textContent=`Block group: ${p.block_group}`;box.append(id); }
+    const note=document.createElement('p');note.textContent='This is an area-wide estimate, not canopy measured within this park. Point = park centroid, not entrance.';box.append(note);
+    const date=document.createElement('p');date.textContent='Park inventory retrieved October 23, 2026.';box.append(date);
+    if(popup)popup.remove();
+    popup=new maplibregl.Popup({maxWidth:'300px'}).setLngLat(feature.geometry.coordinates).setDOMContent(box).addTo(map);
+  }
+  map.on('load',async()=>{
+    showSeattle(0);
+    let basemapAvailable=false;
+    try {
+      basemapAvailable=(await fetch('assets/mapbox-independent/8/41/89.png',{method:'HEAD'})).ok;
+    } catch(error) { console.info('Required basemap availability check failed:',error); }
+    if(basemapAvailable) {
+      map.addSource('basemap-tiles',{
+        type:'raster',tiles:['assets/mapbox-independent/{z}/{x}/{y}.png'],tileSize:256,
+        scheme:'xyz',minzoom:8,maxzoom:13,bounds:[-122.46,47.48,-122.22,47.75],
+        attribution:'<a href="https://www.mapbox.com/about/maps/">© Mapbox</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      });
+      map.addLayer({id:'basemap',type:'raster',source:'basemap-tiles',paint:{'raster-opacity':1,'raster-fade-duration':0}});
+    }
+    map.addSource('canopy-tiles',{
+      type:'raster',tiles:['assets/canopy-2021/{z}/{x}/{y}.png'],tileSize:256,
+      scheme:'xyz',minzoom:8,maxzoom:13,bounds:[-122.46,47.48,-122.22,47.75],
+      attribution:'Canopy: University of Vermont Spatial Analysis Laboratory / City of Seattle (2021)'
+    });
+    map.addLayer({id:'canopy',type:'raster',source:'canopy-tiles',paint:{'raster-opacity':0.78,'raster-fade-duration':0,'raster-resampling':'nearest'}});
+    map.addSource('parks',{type:'geojson',data:'data/parks.geojson',attribution:'Parks: Seattle Parks and Recreation; retrieved 2026-10-23'});
+    map.addLayer({id:'parks',type:'circle',source:'parks',paint:{
+      'circle-radius':['interpolate',['linear'],['zoom'],8,2,11,4,13,6],
+      'circle-color':'#7a2948','circle-stroke-color':'#ffffff','circle-stroke-width':1.2
+    }});
+    map.on('click','parks',event=>showPark(event.features[0]));
+    map.on('mouseenter','parks',()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','parks',()=>map.getCanvas().style.cursor='');
+    document.getElementById('show-canopy').addEventListener('change',event=>map.setLayoutProperty('canopy','visibility',event.target.checked?'visible':'none'));
+    document.getElementById('show-parks').addEventListener('change',event=>{
+      map.setLayoutProperty('parks','visibility',event.target.checked?'visible':'none');
+      if(!event.target.checked && popup)popup.remove();
+    });
+    try {
+      const response=await fetch('data/parks.geojson');
+      if(!response.ok)throw new Error(`Park data HTTP ${response.status}`);
+      const data=await response.json();
+      const features=data.features.sort((a,b)=>a.properties.name.localeCompare(b.properties.name));
+      const nameCounts=new Map();
+      features.forEach(feature=>nameCounts.set(feature.properties.name,(nameCounts.get(feature.properties.name)||0)+1));
+      const select=document.getElementById('park-select');
+      features.forEach((feature,i)=>{
+        const option=document.createElement('option');option.value=String(i);
+        option.textContent=nameCounts.get(feature.properties.name)>1
+          ? `${feature.properties.name} (PMA ${feature.properties.pma})`
+          : feature.properties.name;
+        select.append(option);
+      });
+      select.disabled=false;
+      select.addEventListener('change',()=>{
+        if(select.value==='')return;
+        const feature=features[Number(select.value)];
+        overviewActive=false;
+        document.getElementById('show-parks').checked=true;map.setLayoutProperty('parks','visibility','visible');
+        map.flyTo({center:feature.geometry.coordinates,zoom:12.5});showPark(feature);
+      });
+      if(!loadError)status.textContent=basemapAvailable
+        ? 'Explore the canopy raster and park points. Choose a park or click a point.'
+        : 'Review draft: the required second Mapbox Studio basemap is missing. The canopy and parks layers are available; this lab is not complete.';
+    } catch(error) { status.textContent='Park data could not be loaded. Open through a local web server and check data/parks.geojson.';console.error(error); }
+  });
+  document.getElementById('reset').addEventListener('click',()=>{
+    if(popup)popup.remove();document.getElementById('park-select').value='';
+    showSeattle(500);
+  });
+</script>
+</body>
+</html>

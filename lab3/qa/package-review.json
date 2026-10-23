@@ -1,0 +1,40 @@
+{
+  "checked_utc": "2026-10-23T09:06:49.198765+00:00",
+  "status": "complete_local_technical_review",
+  "scope": "Pre-publication local checks; remote deployment verification is recorded separately.",
+  "manifest_hashes_match": true,
+  "relative_markdown_links_resolve": true,
+  "credential_pattern_scan_matches": 0,
+  "heavy_qgis_intermediates_in_web_package": 0,
+  "all_document_headings_explicit_black": "Authored documents use explicit black headings; original provided source README retained byte-for-byte",
+  "completed_pyramids": 4,
+  "required_pyramids": 4,
+  "tiles": {
+    "mapbox-guided": 246,
+    "pm25-guided": 246,
+    "mapbox-independent": 96,
+    "canopy-2021": 96
+  },
+  "total_tiles": 684,
+  "station_features": 11,
+  "park_features": 512,
+  "guided_numeric_all_cells_pass": true,
+  "guided_numeric_cells": 52245,
+  "browser_review": "qa/complete-map-browser-review.json",
+  "basemap_report": "qa/basemap-export.json",
+  "structural_report": "qa/four-pyramid-integrity.json",
+  "file_manifest": "qa/package-files.json",
+  "package_file_count": 738,
+  "hashed_file_count": 736,
+  "hashed_file_bytes": 18597898,
+  "screenshots": [
+    "qa/guided-complete-overview.png",
+    "qa/guided-complete-popup.png",
+    "qa/guided-complete-mobile.png",
+    "qa/independent-complete-overview.png",
+    "qa/independent-complete-popup.png",
+    "qa/independent-complete-mobile.png"
+  ],
+  "deployment_verification": "Recorded separately after publishing",
+  "canvas_submission": "Not performed"
+}

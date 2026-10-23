@@ -1,0 +1,13 @@
+{
+  "method": "Direct Euclidean inverse-square weighted mean of all 11 original stations projected with GDAL/OSR to EPSG32610, evaluated at every numeric raster cell center",
+  "cells": 52245,
+  "maximum_absolute_error_ug_m3": 4.7682237713786435e-07,
+  "mean_absolute_error_ug_m3": 1.4114685754649983e-07,
+  "tolerance_ug_m3": 1e-05,
+  "passed": true,
+  "raster_size": [
+    135,
+    387
+  ],
+  "source_station_count": 11
+}

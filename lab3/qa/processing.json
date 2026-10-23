@@ -1,0 +1,190 @@
+{
+  "generated_utc": "2026-10-23T07:57:37.682475+00:00",
+  "qgis": "3.44.15-Solothurn",
+  "gdal": "GDAL 3.13.3 \"Iowa City\", released 2026/08/13",
+  "exporter": "QMetaTiles TileSet renderer (no metatiling)",
+  "canopy_features": 479,
+  "parks_features": 512,
+  "canopy_percent_range": [
+    1.9407442255446803,
+    60.81933056187775
+  ],
+  "raster": {
+    "width": 761,
+    "height": 1325,
+    "crs": "EPSG:32610",
+    "pixel_size_m": 20,
+    "nodata": -9999,
+    "valid_pixels": 542543,
+    "min": 1.9407442255446803,
+    "max": 60.81933056187775,
+    "geotransform": [
+      542320.0,
+      20.0,
+      0.0,
+      5286980.0,
+      0.0,
+      -20.0
+    ]
+  },
+  "extent_wgs84": [
+    -122.46,
+    47.48,
+    -122.22,
+    47.75
+  ],
+  "zoom_range": [
+    8,
+    13
+  ],
+  "tile_size": 256,
+  "tile_scheme": "xyz",
+  "format": "PNG",
+  "thematic_background_transparency": 100,
+  "class_upper_bounds": [
+    10,
+    20,
+    30,
+    40,
+    100
+  ],
+  "class_colors": [
+    "#edf8e9",
+    "#bae4b3",
+    "#74c476",
+    "#31a354",
+    "#006d2c"
+  ],
+  "class_labels": [
+    "0\u201310%",
+    ">10\u201320%",
+    ">20\u201330%",
+    ">30\u201340%",
+    ">40\u2013100%"
+  ],
+  "parks_with_exactly_one_canopy_block_group": 482,
+  "parks_without_unique_block_group": [
+    {
+      "park": "ALKI BEACH PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "ANDOVER PLACE",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "ATLANTIC CITY BOAT RAMP",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "CHARLES RICHEY SR VIEWPOINT",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "CORMORANT COVE",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "DISCOVERY PARK TIDELANDS",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "EMMA SCHMITZ MEMORIAL OVERLOOK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "FAIRVIEW WALKWAY",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "LAKEWOOD MOORAGE",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "LESCHI PARK AND SOUTH MOORAGE",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "LOWMAN BEACH PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "MADISON PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "MADISON PARK NORTH BEACH",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "MAGNOLIA TIDELANDS PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "LAKE CITY BEACH PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "NORTH LESCHI MOORAGE",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "OPEN WATER PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "PRITCHARD ISLAND BEACH",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "SEACREST PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "SEATTLE AQUARIUM",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "SOUTH PARK PLAZA",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "STANLEY SAYRES MEMORIAL PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "STIM BULLITT NATURAL AREA",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "SUNNYSIDE AVE N BOAT RAMP",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "TERRY PETTUS PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "WATERFRONT PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "WATERWAY 19",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "WEST MONTLAKE PARK",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "HERRINGS HOUSE PARK (T'UL'ALTXW)",
+      "matching_block_groups": 0
+    },
+    {
+      "park": "LAKE WASHINGTON BOULEVARD",
+      "matching_block_groups": 0
+    }
+  ],
+  "tile_count": 96,
+  "basemap_status": "Not created by this script. Required second Mapbox Studio export remains separate."
+}

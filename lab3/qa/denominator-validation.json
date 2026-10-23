@@ -1,0 +1,8 @@
+{
+  "feature_count": 479,
+  "formula": "TreeCanopy_2021_Area / TC_Land_A * 100",
+  "maximum_percent_error": 0.0,
+  "land_area": "Total_A - Water_A",
+  "maximum_area_error": 0,
+  "source_url": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Tree_Canopy_Block_Groups_2016_2021/FeatureServer/0/query?where=1%3D1&outFields=ID%2CTotal_A%2CWater_A%2CTC_Land_A%2CTreeCanopy_2021_Area%2CTreeCanopy_2021_Percent&returnGeometry=false&f=json&resultRecordCount=2000"
+}

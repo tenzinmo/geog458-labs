@@ -1,0 +1,77 @@
+{
+  "id": "9baab63b52df417a9b2a168e3f288b1b",
+  "owner": "SeattleParks_SeattleCityGIS",
+  "ownerId": "66aba6403044dd4c94dd24a3e1bfa616",
+  "orgId": "ZOyb2t4B0UYuYNYH",
+  "created": 1690237635000,
+  "modified": 1792672615000,
+  "guid": null,
+  "name": "Park_Boundaries",
+  "title": "Park Boundaries",
+  "type": "Feature Service",
+  "typeKeywords": [
+    "ArcGIS API for JavaScript",
+    "ArcGIS Server",
+    "Data",
+    "Feature Access",
+    "Feature Service",
+    "Metadata",
+    "Multilayer",
+    "Service",
+    "Hosted Service"
+  ],
+  "description": "<div style='text-align:left;'><p style='font-size:12pt;'><span>This grouped layer of City of Seattle Parks contains Parks centroids, Parks Boundary outlines, Parks, and also Parks not owned by Seattle Parks and Recreation.  <\/span><\/p><p style='font-size:12pt;'><span>Layers also available separately as hosted views:<\/span><\/p><p><a href='https://seattlecitygis.maps.arcgis.com/home/item.html?id=4716ad0438184533bac48619b78ce73e' target='_blank' rel='nofollow ugc noopener noreferrer'>Parks Boundary Centroids<\/a><\/p><p><a href='https://seattlecitygis.maps.arcgis.com/home/item.html?id=8c994f7dd0a54346b504b853679dd099' target='_blank' rel='nofollow ugc noopener noreferrer'>Parks Boundary (outline)<\/a><\/p><p><a href='https://seattlecitygis.maps.arcgis.com/home/item.html?id=94e59cd6e7a6479c9131cc3eb40b29b8' target='_blank' rel='nofollow ugc noopener noreferrer'>Parks Boundary (details)<\/a><\/p><p><a href='https://seattlecitygis.maps.arcgis.com/home/item.html?id=dc6c676623334870852d62ee484822ad' target='_blank' rel='nofollow ugc noopener noreferrer'>Parks Not SPR<\/a><\/p><p><span style='font-family:&quot;Avenir Next W01&quot;, &quot;Avenir Next W00&quot;, &quot;Avenir Next&quot;, Avenir, &quot;Helvetica Neue&quot;, sans-serif; font-size:16px;'>Refresh Cycle: Weekly on Mondays<\/span><span style='font-size:16px;'><br /><\/span><\/p><\/div>",
+  "tags": [
+    "Park",
+    "Parks",
+    "SPR",
+    "Seattle GIS Open Data"
+  ],
+  "snippet": "SPR Park Boundaries",
+  "thumbnail": "thumbnail/9baab63b52df417a9b2a168e3f288b1b_standard_tn.png",
+  "documentation": null,
+  "extent": [
+    [
+      -122.4422128412673,
+      47.49646896863028
+    ],
+    [
+      -122.24048490911866,
+      47.73562953110041
+    ]
+  ],
+  "categories": [
+    "/Categories/Common Data Layers",
+    "/Categories/SPR (Parks)"
+  ],
+  "spatialReference": "2926",
+  "accessInformation": "City of Seattle, Seattle Parks and Recreation",
+  "classification": null,
+  "licenseInfo": "<div style='text-align:Left;font-size:12pt'><p><span>The City of Seattle makes no representation or warranty as to its accuracy, and in particular, its accuracy as to labeling, dimensions, contours, property boundaries, or placement or location of any map feature thereof.<\/span><\/p><\/div>",
+  "culture": "en-us",
+  "properties": {"indexJobId": ""},
+  "advancedSettings": null,
+  "url": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Park_Boundaries/FeatureServer",
+  "proxyFilter": null,
+  "access": "public",
+  "size": 26812416,
+  "subInfo": 0,
+  "appCategories": [],
+  "industries": [],
+  "languages": [],
+  "largeThumbnail": null,
+  "banner": null,
+  "screenshots": [],
+  "listed": false,
+  "commentsEnabled": true,
+  "numComments": 0,
+  "numRatings": 0,
+  "avgRating": 0,
+  "numViews": 162084,
+  "contentStatus": "public_authoritative",
+  "scoreCompleteness": 86,
+  "groupDesignations": null,
+  "apiToken1ExpirationDate": -1,
+  "apiToken2ExpirationDate": -1,
+  "lastViewed": 1792738800000
+}

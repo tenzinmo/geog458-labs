@@ -1,0 +1,28 @@
+{
+  "four_pyramids": {
+    "mapbox-guided": {
+      "tiles": 246,
+      "exact_xyz_grid": true,
+      "dimensions_crc_decompression": true
+    },
+    "pm25-guided": {
+      "tiles": 246,
+      "exact_xyz_grid": true,
+      "dimensions_crc_decompression": true
+    },
+    "mapbox-independent": {
+      "tiles": 96,
+      "exact_xyz_grid": true,
+      "dimensions_crc_decompression": true
+    },
+    "canopy-2021": {
+      "tiles": 96,
+      "exact_xyz_grid": true,
+      "dimensions_crc_decompression": true
+    }
+  },
+  "relative_markdown_links": true,
+  "credential_pattern_matches": 0,
+  "html_black_heading_rule": true,
+  "live": null
+}

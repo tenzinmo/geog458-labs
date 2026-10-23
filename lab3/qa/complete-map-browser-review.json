@@ -1,0 +1,67 @@
+{
+  "checked_utc": "2026-10-23T09:02:21.278805+00:00",
+  "scope": "Complete local maps, after basemap export",
+  "maps": {
+    "guided": {
+      "html": "morigesefal_lab3-1.html",
+      "sha256": "8e650db7c936f0f74856ac73cd0d6da4cd5a0a4ca86ee383b4b30a395f8412c7",
+      "screenshots": [
+        "qa/guided-complete-overview.png",
+        "qa/guided-complete-popup.png",
+        "qa/guided-complete-mobile.png"
+      ]
+    },
+    "independent": {
+      "html": "morigesefal_lab3-2.html",
+      "sha256": "6c13bb4848aafdf8069558d097570fbccf830953fed95be6f57aeb96579c482f",
+      "screenshots": [
+        "qa/independent-complete-overview.png",
+        "qa/independent-complete-popup.png",
+        "qa/independent-complete-mobile.png"
+      ]
+    }
+  },
+  "desktop_viewport": [
+    1680,
+    873
+  ],
+  "narrow_viewport": [
+    390,
+    844
+  ],
+  "physical_phone_test": false,
+  "heads_explicit_black": true,
+  "basemap_geography_alignment": "Pass: Puget Sound shoreline and Seattle geographic context align with thematic and vector sources",
+  "contrast": "Pass: dark station and purple park points remain distinguishable above warm continuous PM2.5 and green classified canopy rasters",
+  "attribution": "Mapbox and OpenStreetMap links retained; datasets credited; narrow-map initial/reset framing reserves100px extra bottom space",
+  "browser_warning_error_count": 0,
+  "ui_fixes": [
+    "Initial/reset framing reserves attribution space at map widths<=680px",
+    "Panel button styles scoped to #panel so popup close controls retain their own layout"
+  ],
+  "source_value_checks": {
+    "Seattle-10th & Weller": {
+      "pm25": 9.2,
+      "units": "\u00b5g/m\u00b3",
+      "date": "2025-07-05",
+      "station_id": "53-033-0030"
+    },
+    "Discovery Park PMA310": {
+      "canopy_pct_2021_rounded": 58.1,
+      "block_group": "530330057001",
+      "meaning": "Surrounding block-group land-area estimate, not park measurement"
+    }
+  },
+  "checks": [
+    "Both required basemaps load; no missing-asset notices",
+    "Both thematic layers and related vectors load separately",
+    "Selectors open correct popups and fly to selected features",
+    "Layer switches work; park switch closes popup",
+    "Guided interpolation switch hides/restores its legend",
+    "Both reset controls restore full-study view",
+    "Desktop and narrow maps inspected; panel scroll exposes controls and legend",
+    "Published-style colors and source/output tile-coordinate comparisons are recorded separately in basemap-export.json"
+  ],
+  "live_deployment_check": "Recorded separately after publishing",
+  "canvas_submission": "Not performed"
+}

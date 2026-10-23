@@ -1,0 +1,104 @@
+{
+  "record_date": "2026-10-23",
+  "scope": "Mapbox style and raster-export technical provenance",
+  "guided": {
+    "name": "lab3-air-quality-morigesefal",
+    "style_id": "cmvko96g200e101r73f81029u",
+    "state": "Style successfully published in Mapbox Studio",
+    "exported_tile_pyramid": true,
+    "required_export": {
+      "folder": "assets/mapbox-guided",
+      "bounds": [
+        -122.75,
+        47.1,
+        -122.05,
+        48.15
+      ],
+      "zoom_range": [
+        8,
+        12
+      ],
+      "scheme": "xyz",
+      "tile_size": 256,
+      "format": "PNG",
+      "display_crs": "EPSG:3857",
+      "background": "opaque",
+      "basemap_only": true,
+      "all_output_alpha_255": true
+    },
+    "publication_confirmation_date": "2026-10-23",
+    "publication_confirmation_source": "Mapbox Studio UI",
+    "export_status": "validated",
+    "expected_tile_count": 246,
+    "actual_tile_count": 246,
+    "export_evidence": "qa/basemap-export.json",
+    "owner": "moooonster",
+    "production_verification": {
+      "status": "Published style JSON matched the required design changes; export validated against corresponding source tile coordinates",
+      "evidence": "qa/basemap-export.json"
+    },
+    "qgis_version": "3.44.15-Solothurn",
+    "exporter": "QMetaTiles 1.5, QGIS XYZ provider reading authenticated style-specific source cache",
+    "export_date": "2026-10-23",
+    "source_style_snapshot": "source/mapbox-guided-style.json",
+    "source_style_snapshot_sha256": "3174bf2bf840efce9057effa12deb15393839a1dbc52d947a6115bee4c5bbcc7",
+    "production_response_sha256": "60e020985f468955463ab3ac5bb6e3f4c8521762ed96d5eb3a3f2f571b5c0ab7",
+    "production_style_retrieved_utc": "2026-10-23T08:56:20.455822+00:00",
+    "complete_local_map_validation": {
+      "status": "passed",
+      "evidence": "qa/complete-map-browser-review.json"
+    }
+  },
+  "independent": {
+    "name": "lab3-seattle-canopy-morigesefal",
+    "style_id": "cmvkokzsf00cv01sodrah6wf2",
+    "state": "Style successfully published in Mapbox Studio",
+    "exported_tile_pyramid": true,
+    "required_export": {
+      "folder": "assets/mapbox-independent",
+      "bounds": [
+        -122.46,
+        47.48,
+        -122.22,
+        47.75
+      ],
+      "zoom_range": [
+        8,
+        13
+      ],
+      "scheme": "xyz",
+      "tile_size": 256,
+      "format": "PNG",
+      "display_crs": "EPSG:3857",
+      "background": "opaque",
+      "basemap_only": true,
+      "all_output_alpha_255": true
+    },
+    "publication_confirmation_date": "2026-10-23",
+    "publication_confirmation_source": "Mapbox Studio UI",
+    "export_status": "validated",
+    "expected_tile_count": 96,
+    "actual_tile_count": 96,
+    "export_evidence": "qa/basemap-export.json",
+    "published_colors": {
+      "water": "#dfe8ec",
+      "land": "#f6f5ef"
+    },
+    "owner": "moooonster",
+    "production_verification": {
+      "status": "Published style JSON matched the required design changes; export validated against corresponding source tile coordinates",
+      "evidence": "qa/basemap-export.json"
+    },
+    "qgis_version": "3.44.15-Solothurn",
+    "exporter": "QMetaTiles 1.5, QGIS XYZ provider reading authenticated style-specific source cache",
+    "export_date": "2026-10-23",
+    "source_style_snapshot": "source/mapbox-independent-style.json",
+    "source_style_snapshot_sha256": "811e4939ba7bb3130cc42d9517bec5544915ae239c21b092829264a596b96eb2",
+    "production_response_sha256": "9c671ff84cf8252174d3dbfe5fa8db98c4ade841becb303c8315b1361039b0b8",
+    "production_style_retrieved_utc": "2026-10-23T08:58:17.599136+00:00",
+    "complete_local_map_validation": {
+      "status": "passed",
+      "evidence": "qa/complete-map-browser-review.json"
+    }
+  }
+}

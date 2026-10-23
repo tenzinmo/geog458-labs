@@ -1,0 +1,20 @@
+{
+  "canopy": {
+    "service": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Tree_Canopy_Block_Groups_2016_2021/FeatureServer",
+    "service_sha256": "f83a4156b8cf146f9271788c2219a888bb0064426122bf4d58e5a19756e53494",
+    "layer_sha256": "671aa171d3eb5a18c3038f3a8aafe8732a3323a1091cbe58e46992f9dac1d029",
+    "query_url": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Tree_Canopy_Block_Groups_2016_2021/FeatureServer/0/query?where=1%3D1&outFields=ID%2CNAME%2CTreeCanopy_2021_Percent%2CTreeCanopy_2016_Percent%2CChange_Percent_AbsDiff&outSR=4326&returnGeometry=true&f=geojson&orderByFields=OBJECTID_12_13&resultRecordCount=2000",
+    "feature_count": 479,
+    "sha256": "9f99f257b80e9f863ce2acba5d4a30ce78e8721fb5c14f344983775e4e6d893b",
+    "retrieved_utc": "2026-10-23T07:47:17.764646+00:00"
+  },
+  "parks": {
+    "service": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Park_Boundaries/FeatureServer",
+    "service_sha256": "f5ebade4a0c8dd2e863b035a87b6c358a5fc6d5a6476e7f76e88c5dac25cbf7b",
+    "layer_sha256": "69fc21ecbfd3fff94d17820efe2593b16d254279053b254e8ddb05a0a5f1e257",
+    "query_url": "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/Park_Boundaries/FeatureServer/0/query?where=1%3D1&outFields=NAME%2CPMA%2CPARKSBND_AREA&outSR=4326&returnGeometry=true&f=geojson&orderByFields=OBJECTID&resultRecordCount=2000",
+    "feature_count": 512,
+    "sha256": "a8b4ed4aef8c8e5d8a4dab1981d292b8c2167f5da53cbfeae5721cf9f13d56b1",
+    "retrieved_utc": "2026-10-23T07:47:18.997982+00:00"
+  }
+}

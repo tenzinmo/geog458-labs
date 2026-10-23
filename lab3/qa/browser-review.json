@@ -1,0 +1,28 @@
+{
+  "checked_on": "2026-10-23",
+  "status": "partial_pass_basemap_pending",
+  "url": "http://127.0.0.1:8765/morigesefal_lab3-2.html",
+  "browser": "Chrome",
+  "desktop_viewport": "1680x872",
+  "mobile_layout": "390x844 iframe viewport; initial view and scrollable controls/legend inspected",
+  "checks": {
+    "initial_view_shows_full_seattle_after_fix": true,
+    "show_seattle_reset": true,
+    "canopy_toggle": true,
+    "parks_toggle_and_popup_dismissal": true,
+    "park_selector": true,
+    "direct_point_click": "KIWANIS MEMORIAL PRESERVE PARK, 42.0%, block group 530330057005",
+    "gas_works_popup": "18.5%; source 18.51560277913652; block group 530330054002",
+    "discovery_park_popup": "58.1%; source 58.13846594885642; block group 530330057001; selector PMA 310",
+    "null_popup": "ALKI BEACH PARK: No containing canopy block group: no estimate assigned.",
+    "browser_warn_error_logs": [],
+    "local_server_requests": "HTML, parks GeoJSON, canopy PNG requests returned 200. Expected missing-basemap HEAD returned 404. Favicon missing; no data impact.",
+    "all_heading_colors": "black visually inspected"
+  },
+  "limitations": [
+    "Mapbox basemap tiles not exported; visible incomplete banner retained.",
+    "Combined basemap/thematic contrast and final published pages not yet testable.",
+    "Mobile testing covers layout in a narrow iframe, not a physical phone or touch device."
+  ],
+  "screenshots": ["browser-desktop-review.png", "browser-mobile-review.png", "browser-popup-review.png"]
+}

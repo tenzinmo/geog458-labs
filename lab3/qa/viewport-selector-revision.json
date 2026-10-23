@@ -1,0 +1,11 @@
+{
+  "html_js_syntax": "PASS: node --check",
+  "selector_label_count": 512,
+  "unique_selector_labels": 512,
+  "repeated_name_features_disambiguated": 35,
+  "disambiguation": "source PMA (Property Management Area) only for repeated park names",
+  "study_area_initial_and_reset": "same bounds and responsive padding; exact camera maxBounds removed",
+  "source_data_and_tiles_modified": false,
+  "browser_recheck": "parent pending",
+  "mobile_preview": "qa/mobile-preview.html, 390 x 844 titled iframe"
+}
