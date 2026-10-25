@@ -26,7 +26,7 @@ The official canopy metadata describes automated remote-sensing classification w
 
 1. Download the two official ArcGIS REST layers as WGS84 GeoJSON. Compare the returned feature totals against independent service count queries; no transfer-limit truncation is accepted. Save the original responses, query URLs, timestamps, and SHA-256 hashes in `source/`.
 2. Retain only map-relevant fields in the web GeoJSON. Use the source’s 2021 percent without rounding it for GIS processing. Validate that all 479 values are finite and within 0–100, and block-group IDs are unique.
-3. Check the percentage denominator against all 479 source records. The formula is `TreeCanopy_2021_Area / TC_Land_A × 100`, and `TC_Land_A = Total_A − Water_A`. Both comparisons match exactly. Thus the legend says **percent of block-group land area**, not percent of total area including water.
+3. Check the percentage denominator against all 479 source records. The formula is `TreeCanopy_2021_Area / TC_Land_A × 100`, and `TC_Land_A = Total_A − Water_A`. Both comparisons match within floating-point precision. Thus the legend says **percent of block-group land area**, not percent of total area including water.
 4. Reproject the polygons to WGS84 / UTM zone 10N (EPSG:32610). Rasterize the percentage attribute on a 20 m, pixel-aligned grid using GDAL, retaining Float64 values and −9999 NoData. The result is a numerical GeoTIFF, not a standalone decorative image. The grid is 761 × 1,325 cells; 542,543 cells contain data.
 5. In QGIS 3.44.15, style the raster as discrete pseudocolor classes: 0–10% `#edf8e9`; >10–20% `#bae4b3`; >20–30% `#74c476`; >30–40% `#31a354`; >40–100% `#006d2c`. Each upper boundary is inclusive. These deliberately simple 10-point breaks are a design decision, not statistical “natural breaks”; the last class contains the observed maximum of 60.82%.
 6. Export with the installed QMetaTiles 1.5 renderer. Only the canopy raster is rendered, with empty-area transparency 100, PNG, 256 × 256, XYZ (TMS unchecked), extent and zooms above. The Mapbox background and park points are not baked into these thematic tiles. Keep the raster and project locally for reproduction.
@@ -45,18 +45,16 @@ The map can support exploration and questions about canopy distribution. It cann
 
 <h2 style="color:#000000">Validation and screenshots</h2>
 
-Evidence is retained in [processing](qa/processing.json), [denominator validation](qa/denominator-validation.json), [raster and tile validation](qa/validation.json), and [browser checks](qa/browser-review.json). All 479 percentages use land area as their denominator; 2,000 sampled numerical raster cells match their source polygon values. All 96 thematic PNGs pass grid, integrity, dimension and transparency checks.
+The October 24 [independent audit](qa/2026-10-24-independent-audit.json) verified all 479 land-area denominators, reproduced all 512 park joins (482 unique matches and 30 nulls), and checked 5,000 fresh random numerical raster cells against source polygons. All 96 thematic PNGs pass grid, integrity, dimension and transparency checks. The separate [geographic tile audit](qa/2026-10-24-tile-geography-audit.json) found 5,391 interior tile pixels in the correct canopy class at the correct location; 2,461 boundary samples were excluded.
 
-The thematic/vector browser checks pass for actual PNG/GeoJSON loading, layer controls, selector, direct point popup, reset and full extent. Discovery Park (PMA 310), block group `530330057001`, displays 58.1%, matching `58.13846594885642`; Gas Works Park displays 18.5%, matching `18.51560277913652`. Alki Beach Park correctly retains no estimate. These compare against the published classification, not ground measurements. The 390 × 844 iframe layout and scrollable controls were inspected; no physical-phone test is claimed.
+The independent basemap was exported on October 23, 2026 with QGIS 3.44.15 and QMetaTiles 1.5. Its 96 opaque, 256 × 256 PNGs have the exact extent and zoom range above. [Export validation](qa/basemap-export.json) records grid coverage, integrity, source/output comparisons and style-color checks. Two higher-difference tiles were inspected for QGIS line-edge resampling; geography and labels aligned. The thematic raster remains separate and transparent outside its source polygons.
 
-The independent basemap was exported on October 23, 2026 with QGIS 3.44.15 and QMetaTiles 1.5. The QGIS XYZ provider read a source cache tied to the published style and its production JSON hash. Only the basemap entered this export. Its 96 PNGs are opaque, 256 × 256, XYZ, EPSG:3857, with the exact extent and zoom range above. [Export validation](qa/basemap-export.json) records complete grid coverage, integrity, source/output tile comparisons and style-color checks. Two higher-difference independent tiles were individually inspected for QGIS line-edge resampling; geographic features and labels aligned. The thematic raster remains separate and transparent outside its source polygons.
+Browser checks compare Discovery Park’s 58.1%, Gas Works Park’s 18.5% and Alki Beach Park’s missing estimate with the original joined values, then exercise controls, selectors, popup closing and full-area reset. The [QA index](qa/README.md) records the current review and identifies earlier thematic-only records as historical. Browser viewport testing does not establish physical-phone behavior.
 
-The complete local map passed basemap/canopy alignment and contrast, tile/GeoJSON loading, legends, controls, selector, popup closing, source-value comparisons and full-area reset. All 512 park features loaded and Discovery Park displayed the correct 58.1%. No JavaScript warnings or errors were observed. The complete 390 × 844 iframe layout was inspected with attribution visible. [Complete-map browser evidence](qa/complete-map-browser-review.json) records the checks.
+![Seattle canopy and parks overview](qa/2026-10-24-independent-final-overview.png)
 
-![Seattle canopy and parks overview](qa/independent-complete-overview.png)
+![Seattle canopy and parks source-value popup](qa/2026-10-24-independent-final-popup.png)
 
-![Seattle canopy and parks source-value popup](qa/independent-complete-popup.png)
-
-![Seattle canopy and parks in a 390 by 844 iframe](qa/independent-complete-mobile.png)
+![Seattle canopy and parks in a 390 by 844 browser viewport](qa/2026-10-24-independent-final-mobile.png)
 
 Open [the independent page](https://tenzinmo.github.io/geog458-labs/lab3/morigesefal_lab3-2.html) in a browser, or serve this folder locally and open `morigesefal_lab3-2.html`. Deployment and remote verification are recorded separately. The [combined methods record](README.md) lists both maps and the submission URLs. Canvas submission remains pending.

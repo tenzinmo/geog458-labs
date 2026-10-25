@@ -1,0 +1,172 @@
+{
+  "reviewed_at_utc": "2026-10-25T03:57:57.803620+00:00",
+  "scope": "Local final map behavior; deployment is verified separately. Browser viewport tests, not physical-phone tests.",
+  "html_sha256": {
+    "morigesefal_lab3-1.html": "88317c67c5271702bd9f5e392c518c86b97e48305bee2d862368c93ae6ae6ce2",
+    "morigesefal_lab3-2.html": "ff2fa8f51c1fe520395f1ce7f942294e22609a44809587991f425b6fe1d9925a"
+  },
+  "viewports": [
+    [
+      1280,
+      720
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      320,
+      568
+    ],
+    [
+      844,
+      390
+    ]
+  ],
+  "guided": {
+    "station_option_count": 11,
+    "source_value_checks": {
+      "Seattle-10th & Weller": 9.2,
+      "TACOMA - ALEXANDER AVE": 4.1,
+      "MARYSVILLE - 7TH AVE (Marysville Junior High)": 12.1
+    },
+    "popup_units": "µg/m³",
+    "date": "2025-07-05",
+    "station_ID_and_daily_summary": "present",
+    "direct_point_click": "pass; Marysville",
+    "selector_restores_hidden_points": "pass",
+    "interpolation_switch_and_legend": "pass",
+    "station_switch_closes_popup": "pass",
+    "reset_clears_popup_and_selection": "pass",
+    "landscape_full_extent": "pass after reducing camera minimum zoom to 7; source tile zooms remain 8–12",
+    "portrait_popup": "inside map and above attribution at 390×844 and 320×568",
+    "landscape_popup": "close button visible, body keyboard-scrollable; End reached bottom",
+    "normal_console_warnings_or_errors": []
+  },
+  "independent": {
+    "park_option_count": 512,
+    "source_value_checks": {
+      "DISCOVERY PARK (PMA 310)": 58.1,
+      "GAS WORKS PARK": 18.5,
+      "ALKI BEACH PARK": null
+    },
+    "discovery_block_group": "530330057001",
+    "interpretation": "2021 surrounding block-group land-area estimate, not park measurement; inventory date retained",
+    "direct_point_click": "pass; Discovery Park",
+    "selector_restores_hidden_points": "pass",
+    "canopy_switch_and_legend": "pass",
+    "park_switch_closes_popup": "pass",
+    "reset_clears_popup_and_selection": "pass",
+    "popup_resize": "stays within map and above attribution at 390×844, 320×568 and 844×390; content scrolls when needed",
+    "normal_console_warnings_or_errors": []
+  },
+  "failure_fixtures": [
+    {
+      "test": "blocked-module",
+      "name": "guided",
+      "controls": [
+        {
+          "disabled": true,
+          "id": "station-select"
+        },
+        {
+          "disabled": true,
+          "id": "reset"
+        },
+        {
+          "disabled": true,
+          "id": "show-surface"
+        },
+        {
+          "disabled": true,
+          "id": "show-stations"
+        }
+      ],
+      "status": "The map library could not load. Check your internet connection, then reload this page."
+    },
+    {
+      "test": "blocked-module",
+      "name": "canopy",
+      "controls": [
+        {
+          "disabled": true,
+          "id": "park-select"
+        },
+        {
+          "disabled": true,
+          "id": "reset"
+        },
+        {
+          "disabled": true,
+          "id": "show-canopy"
+        },
+        {
+          "disabled": true,
+          "id": "show-parks"
+        }
+      ],
+      "status": "The map library could not load. Check your internet connection, then reload this page."
+    },
+    {
+      "test": "delayed-basemap-initial",
+      "controls": [
+        {
+          "disabled": true,
+          "id": "park-select"
+        },
+        {
+          "disabled": true,
+          "id": "show-canopy"
+        },
+        {
+          "disabled": true,
+          "id": "show-parks"
+        }
+      ],
+      "status": "Loading map and checking the required local basemap…"
+    },
+    {
+      "test": "missing-vector",
+      "name": "guided",
+      "selectorDisabled": true,
+      "status": "Review draft: missing the original station observations. This lab is not complete."
+    },
+    {
+      "test": "missing-vector",
+      "name": "canopy",
+      "selectorDisabled": true,
+      "status": "A map resource did not load. Check local PNG and GeoJSON paths before using this map."
+    },
+    {
+      "test": "delayed-basemap-completed",
+      "controls": [
+        {
+          "disabled": false,
+          "id": "park-select"
+        },
+        {
+          "disabled": false,
+          "id": "show-canopy"
+        },
+        {
+          "disabled": false,
+          "id": "show-parks"
+        }
+      ],
+      "status": "Explore the canopy raster and park points. Choose a park or click a point."
+    }
+  ],
+  "headings": "Explicit black CSS rule retained; computed h1/h2 colors verified rgb(0,0,0) on both pages",
+  "changes": "Bounded popups and camera placement; viewport-height layouts; guided landscape overview; disabled initial independent controls; canopy legend follows layer; actionable library-load error; formatted methods link.",
+  "screenshots_sha256": {
+    "2026-10-24-guided-final-overview.png": "a01b59a09360ef3c88485f5a72f01377c2b5dd3acb6f190bc1af2c040f763bde",
+    "2026-10-24-guided-final-popup.png": "8c3862f3a3052ebe3179c74c8dee7219761f3287e0b8e115d8569e23db814945",
+    "2026-10-24-guided-final-mobile.png": "b3d18e62249ce6d5fdf5c67ae8d200b3f4e565923e64fab5d3d01b9996c9f5dc",
+    "2026-10-24-independent-final-overview.png": "753e6e8cc57620a9053d240a1de53c6c43513de1ca75f90dff788c4458dd2484",
+    "2026-10-24-independent-final-popup.png": "aa593080aae2e9f00941107003546e8281f8c156ea6404c3a8438917831fc705",
+    "2026-10-24-independent-final-mobile.png": "222a0081ff18bf882d7941677dfc9ec3cf8cecc64fe16c9b1ce1fe38f25c8cf6",
+    "2026-10-24-guided-local-landscape-overview.png": "a01b59a09360ef3c88485f5a72f01377c2b5dd3acb6f190bc1af2c040f763bde",
+    "2026-10-24-independent-local-landscape-popup.png": "054ccf4575fb5fdc717ff7b34b8605f24f0caeaa7a47e3582397198fbd1ba505"
+  },
+  "canvas_submitted": false
+}

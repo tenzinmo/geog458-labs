@@ -8,8 +8,8 @@
   <style>
     * { box-sizing: border-box; }
     body { margin:0; color:#202921; font:15px/1.5 Arial,sans-serif; background:#f5f5ef; }
-    main { display:grid; grid-template-columns:320px 1fr; height:100dvh; }
-    #panel { padding:24px 22px; overflow:auto; border-right:1px solid #d6ddd2; z-index:1; }
+    main { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:minmax(0,1fr); height:100dvh; min-height:0; }
+    #panel { padding:24px 22px; min-height:0; overflow:auto; border-right:1px solid #d6ddd2; z-index:1; }
     h1,h2,h3,h4,h5,h6 { color:#000000; }
     h1 { font-size:26px; line-height:1.15; margin:6px 0 14px; }
     h2 { font-size:15px; margin:18px 0 6px; }
@@ -28,13 +28,14 @@
     #panel button { cursor:pointer; margin-top:7px; }
     a { color:#265b35; text-underline-offset:2px; }
     summary { cursor:pointer; font-weight:bold; color:#000; }
-    .maplibregl-popup-content { font:13px/1.5 Arial,sans-serif; padding:14px; }
+    .maplibregl-popup-content { font:13px/1.5 Arial,sans-serif; padding:28px 14px 12px; max-height:var(--popup-content-height,360px); overflow:hidden; }
+    .popup-body { max-height:calc(var(--popup-content-height,360px) - 40px); overflow-y:auto; overscroll-behavior:contain; }
+    .maplibregl-popup-close-button { width:28px; height:28px; background:#fff; color:#202921; z-index:1; }
     .maplibregl-popup-content h2 { margin:0 0 7px; }
     @media(max-width:680px) {
-      main { grid-template-columns:1fr; grid-template-rows:minmax(270px,43dvh) 1fr; }
+      main { grid-template-columns:1fr; grid-template-rows:minmax(0,43dvh) minmax(0,1fr); }
       #panel { padding:14px 18px; border-right:0; border-bottom:1px solid #d6ddd2; }
       h1 { font-size:22px; }
-      #map { min-height:50dvh; }
     }
   </style>
 </head>
@@ -49,8 +50,9 @@
     <select id="park-select" disabled><option value="">Choose a park…</option></select>
     <button id="reset" type="button">Show Seattle</button>
     <div class="rule"></div>
-    <label><input id="show-canopy" type="checkbox" checked> Show canopy raster</label>
-    <label><input id="show-parks" type="checkbox" checked> Show park centroids</label>
+    <label><input id="show-canopy" type="checkbox" checked disabled> Show canopy raster</label>
+    <label><input id="show-parks" type="checkbox" checked disabled> Show park centroids</label>
+    <div id="legend">
     <h2>Tree canopy in 2021</h2>
     <p class="small">Percent of land area in each census block group</p>
     <div class="row"><span class="swatch" style="background:#edf8e9"></span>0–10%</div>
@@ -58,6 +60,7 @@
     <div class="row"><span class="swatch" style="background:#74c476"></span>More than 20–30%</div>
     <div class="row"><span class="swatch" style="background:#31a354"></span>More than 30–40%</div>
     <div class="row"><span class="swatch" style="background:#006d2c"></span>More than 40–100%</div>
+    </div>
     <div class="row"><span class="dot"></span>Park centroid · click for details</div>
     <p class="small">No canopy data is drawn outside the source polygons. Each block group has one value; the colored pixels are not individual tree locations.</p>
     <details>
@@ -65,15 +68,23 @@
       <p class="small">Canopy: University of Vermont Spatial Analysis Laboratory / City of Seattle, 2021 assessment. Parks: Seattle Parks and Recreation inventory, retrieved October 23, 2026.</p>
       <p class="small">This is a historical, area-level comparison for residents exploring Seattle’s urban environment. It does not measure present shade, public access, or canopy within a park. Park points are centroids, not entrances.</p>
       <p class="small">The canopy classification was manually reviewed; source metadata reports no formal accuracy assessment. A 20 m raster cell is a display choice, not a claim of measurement accuracy.</p>
-      <p class="small"><a href="https://www.arcgis.com/home/item.html?id=c647921426ed423ca79b0703c0b855be">Canopy source & terms</a> · <a href="https://www.arcgis.com/home/item.html?id=9baab63b52df417a9b2a168e3f288b1b">Parks source & terms</a> · <a href="README-independent.md">Method & limits</a></p>
+      <p class="small"><a href="https://www.arcgis.com/home/item.html?id=c647921426ed423ca79b0703c0b855be">Canopy source & terms</a> · <a href="https://www.arcgis.com/home/item.html?id=9baab63b52df417a9b2a168e3f288b1b">Parks source & terms</a> · <a href="https://github.com/tenzinmo/geog458-labs/blob/main/lab3/README-independent.md">Method & limits</a></p>
       <p class="small">Basemap © Mapbox © OpenStreetMap contributors. Canopy and park data credits remain with their publishers.</p>
     </details>
   </aside>
   <div id="map" aria-label="Interactive Seattle canopy and parks map"></div>
 </main>
 <script type="module">
-  import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
   const status=document.getElementById('status');
+  async function initializeMap() {
+  let maplibregl;
+  try {
+    maplibregl=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');
+  } catch(error) {
+    status.textContent='The map library could not load. Check your internet connection, then reload this page.';
+    document.getElementById('reset').disabled=true;
+    console.error(error);return;
+  }
   const studyArea=[[-122.46,47.48],[-122.22,47.75]];
   const mapContainer=document.getElementById('map');
   function overviewPadding() {
@@ -96,7 +107,7 @@
   }
   // Exact raster source bounds below limit tile requests. A camera maxBounds
   // equal to this tall rectangle would crop it on a wide viewport.
-  map.on('resize',()=>{if(overviewActive)showSeattle(0);});
+  map.on('resize',()=>{if(overviewActive)showSeattle(0);else if(popup?.isOpen())focusPopup(0);});
   map.on('dragstart',()=>{overviewActive=false;});
   map.on('zoomstart',event=>{if(event.originalEvent)overviewActive=false;});
   map.addControl(new maplibregl.NavigationControl());
@@ -108,9 +119,22 @@
     status.textContent='A map resource did not load. Check local PNG and GeoJSON paths before using this map.';
     console.error(event.error);
   });
-  function showPark(feature) {
+  function focusPopup(duration=450,zoom=map.getZoom()) {
+    const size=mapContainer.getBoundingClientRect();
+    const attribution=mapContainer.querySelector('.maplibregl-ctrl-bottom-right');
+    const reserve=Math.max(30,(attribution?.getBoundingClientRect().height||0)+12);
+    const top=18,bottom=size.height-reserve-16;
+    const maxContentHeight=Math.max(48,bottom-top-20);
+    const element=popup.getElement();
+    element.style.setProperty('--popup-content-height',`${maxContentHeight}px`);
+    popup.setMaxWidth(`${Math.max(120,Math.min(300,size.width-96))}px`);
+    const height=element.getBoundingClientRect().height;
+    const targetY=Math.min(bottom,Math.max(top+height+10,(top+bottom+height)/2));
+    map.easeTo({center:popup.getLngLat(),zoom,padding:0,offset:[0,targetY-size.height/2],duration,essential:false});
+  }
+  function showPark(feature,zoom=map.getZoom()) {
     const p=feature.properties;
-    const box=document.createElement('div');
+    const box=document.createElement('div');box.className='popup-body';box.tabIndex=0;
     const heading=document.createElement('h2');heading.textContent=p.name;box.append(heading);
     const value=document.createElement('p');
     value.textContent=p.block_group_canopy_pct_2021===null || p.block_group_canopy_pct_2021===undefined
@@ -121,7 +145,10 @@
     const note=document.createElement('p');note.textContent='This is an area-wide estimate, not canopy measured within this park. Point = park centroid, not entrance.';box.append(note);
     const date=document.createElement('p');date.textContent='Park inventory retrieved October 23, 2026.';box.append(date);
     if(popup)popup.remove();
-    popup=new maplibregl.Popup({maxWidth:'300px'}).setLngLat(feature.geometry.coordinates).setDOMContent(box).addTo(map);
+    overviewActive=false;
+    popup=new maplibregl.Popup({maxWidth:'300px',anchor:'bottom',offset:[0,-10],focusAfterOpen:false}).setLngLat(feature.geometry.coordinates).setDOMContent(box).addTo(map);
+    focusPopup(450,zoom);
+    popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
   }
   map.on('load',async()=>{
     showSeattle(0);
@@ -151,11 +178,16 @@
     map.on('click','parks',event=>showPark(event.features[0]));
     map.on('mouseenter','parks',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','parks',()=>map.getCanvas().style.cursor='');
-    document.getElementById('show-canopy').addEventListener('change',event=>map.setLayoutProperty('canopy','visibility',event.target.checked?'visible':'none'));
+    document.getElementById('show-canopy').addEventListener('change',event=>{
+      map.setLayoutProperty('canopy','visibility',event.target.checked?'visible':'none');
+      document.getElementById('legend').hidden=!event.target.checked;
+    });
     document.getElementById('show-parks').addEventListener('change',event=>{
       map.setLayoutProperty('parks','visibility',event.target.checked?'visible':'none');
       if(!event.target.checked && popup)popup.remove();
     });
+    document.getElementById('show-canopy').disabled=false;
+    document.getElementById('show-parks').disabled=false;
     try {
       const response=await fetch('data/parks.geojson');
       if(!response.ok)throw new Error(`Park data HTTP ${response.status}`);
@@ -177,7 +209,7 @@
         const feature=features[Number(select.value)];
         overviewActive=false;
         document.getElementById('show-parks').checked=true;map.setLayoutProperty('parks','visibility','visible');
-        map.flyTo({center:feature.geometry.coordinates,zoom:12.5});showPark(feature);
+        showPark(feature,12.5);
       });
       if(!loadError)status.textContent=basemapAvailable
         ? 'Explore the canopy raster and park points. Choose a park or click a point.'
@@ -187,6 +219,12 @@
   document.getElementById('reset').addEventListener('click',()=>{
     if(popup)popup.remove();document.getElementById('park-select').value='';
     showSeattle(500);
+  });
+  }
+  initializeMap().catch(error=>{
+    status.textContent='The interactive map could not start. Check that your browser supports WebGL, then reload.';
+    document.querySelectorAll('#panel select,#panel input,#panel button').forEach(control=>control.disabled=true);
+    console.error(error);
   });
 </script>
 </body>

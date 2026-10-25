@@ -1,10 +1,10 @@
 <h1 style="color:#000000">GEOG 458 Lab 3 — basemaps, PM2.5 and Seattle canopy</h1>
 
-Mo RiGesefal · October 23, 2026
+Mo RiGesefal · October 24, 2026
 
 This project combines two basemap designs with separate thematic rasters and interactive vector data. The guided map explores measured and estimated PM2.5 across Puget Sound on July 5, 2025. The independent map relates Seattle’s 2021 block-group canopy estimates to named park locations.
 
-The package contains four separately exported tile pyramids, 684 PNG tiles in total, and two locally verified interactive maps.
+The package contains four separately exported tile pyramids, 684 PNG tiles in total, and two interactive maps. Open the [guided PM2.5 map](https://tenzinmo.github.io/geog458-labs/lab3/morigesefal_lab3-1.html) or the [independent canopy map](https://tenzinmo.github.io/geog458-labs/lab3/morigesefal_lab3-2.html). The [QA index](qa/README.md) distinguishes current checks from earlier build records.
 
 | Map | Map file | Current state |
 |---|---|---|
@@ -51,7 +51,7 @@ The canopy classification is an estimate summarized over areas. Rasterizing it a
 
 Canopy credit: University of Vermont Spatial Analysis Laboratory for the City of Seattle Office of Sustainability & Environment; City of Seattle Information Technology, Enterprise GIS Data. Parks: Seattle Parks and Recreation. Required basemap credit is © Mapbox © OpenStreetMap contributors. Source metadata and its limitations remain attached to the underlying data.
 
-Provider terms were checked. Mapbox, OpenStreetMap and dataset attribution is retained with the relevant layers and sources.
+Required Mapbox, OpenStreetMap and dataset attribution is retained with the relevant layers and sources.
 
 <h2 style="color:#000000">Files and verification</h2>
 
@@ -90,27 +90,25 @@ Both basemap pyramids were rendered on October 23, 2026 with QGIS 3.44.15 and QM
 
 <h3 style="color:#000000">Validation</h3>
 
-The guided source checks confirm eleven unique text station IDs, consistent date/units, and matching CSV/GeoJSON coordinates and values. All 52,245 IDW cells match the independent inverse-square calculation within 0.00001 µg/m³. All 246 PM2.5 and 96 canopy PNGs pass dimensions, integrity and XYZ coverage checks. Two thousand sampled canopy raster cells match the source polygons, and all 479 source denominator checks pass.
+The October 24 independent audit recalculated all 52,245 IDW cells from the original eleven stations (maximum difference 0.000000477 µg/m³), verified all 479 canopy denominators and all 512 park joins, and checked 5,000 fresh numerical raster samples. All 684 tiles passed complete XYZ coverage, dimensions and image-integrity checks. A further 5,391 interior tile pixels matched the correct canopy classes at their geographic locations; boundary pixels were excluded from that comparison. See the [numerical and tile audit](qa/2026-10-24-independent-audit.json), [tile-geography audit](qa/2026-10-24-tile-geography-audit.json), and [QA index](qa/README.md).
 
-Local thematic/vector browser checks pass for loading, source alignment, toggles, selectors, direct point popups and full-area reset. Guided popup comparisons match Marysville 12.1, Seattle–10th & Weller 9.2, and Tacoma–Alexander Avenue 4.1 µg/m³. Independent comparisons match Gas Works Park 18.5% and Discovery Park 58.1%; Alki Beach Park retains a null estimate. Both layouts were inspected in a 390 × 844 iframe; no physical-phone test is claimed. Evidence is retained in [guided browser checks](qa/guided-browser-review.json), [independent browser checks](qa/browser-review.json), [guided numeric checks](qa/guided-idw-numeric-check.json), and [canopy checks](qa/validation.json).
-
-Both complete maps passed local browser checks for basemap alignment, intended colors and thematic contrast, all tile/vector loading, layer controls, selectors, popups and reset. The guided map retains all eleven stations and the independent map all 512 parks. Seattle–10th & Weller displays 9.2 µg/m³; Discovery Park displays 58.1%, matching their respective sources. No JavaScript warnings or errors were observed. The complete layouts were inspected at 390 × 844 in an iframe, including attribution visibility and popup closing. This is layout testing, not a physical-phone test. Results are recorded in [complete-map browser review](qa/complete-map-browser-review.json).
+The browser review checks both complete maps, including source-value popups, layer switches, matching legends, selectors, full-area reset and attribution. The [QA index](qa/README.md) identifies the tested version and screen sizes. Earlier thematic-only checks remain intact as historical build evidence; their incomplete-stage flags do not describe the finished maps. Layout tests use a browser viewport, not a physical phone.
 
 <h3 style="color:#000000">Guided map screenshots</h3>
 
-![Guided PM2.5 overview with the adapted basemap, estimated surface and original stations](qa/guided-complete-overview.png)
+![Guided PM2.5 overview with the adapted basemap, estimated surface and original stations](qa/2026-10-24-guided-final-overview.png)
 
-![Guided PM2.5 station popup showing the measured observation](qa/guided-complete-popup.png)
+![Guided PM2.5 station popup showing the measured observation](qa/2026-10-24-guided-final-popup.png)
 
-![Guided PM2.5 map in a 390 by 844 iframe](qa/guided-complete-mobile.png)
+![Guided PM2.5 map in a 390 by 844 browser viewport](qa/2026-10-24-guided-final-mobile.png)
 
 <h3 style="color:#000000">Independent map screenshots</h3>
 
-![Seattle canopy and parks overview with the second adapted basemap](qa/independent-complete-overview.png)
+![Seattle canopy and parks overview with the second adapted basemap](qa/2026-10-24-independent-final-overview.png)
 
-![Seattle canopy and parks popup showing the surrounding block-group estimate](qa/independent-complete-popup.png)
+![Seattle canopy and parks popup showing the surrounding block-group estimate](qa/2026-10-24-independent-final-popup.png)
 
-![Seattle canopy and parks map in a 390 by 844 iframe](qa/independent-complete-mobile.png)
+![Seattle canopy and parks map in a 390 by 844 browser viewport](qa/2026-10-24-independent-final-mobile.png)
 
 <h2 style="color:#000000">Deployment and submission</h2>
 

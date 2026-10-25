@@ -1,0 +1,122 @@
+{
+  "guided": {
+    "station_count": 11,
+    "cross_file_checks": "pass",
+    "grid": [
+      387,
+      135
+    ],
+    "cells": 52245,
+    "maximum_IDW_error": 4.7682237713786435e-07,
+    "range": [
+      4.100431442260742,
+      12.099278450012207
+    ]
+  },
+  "canopy": {
+    "features": 479,
+    "max_denominator_percentage_error": 7.105427357601002e-15,
+    "max_land_area_error": 0,
+    "park_count": 512,
+    "all_original_point_names_coordinates_preserved": true,
+    "recalculated_join_counts": {
+      "1": 482,
+      "0": 30
+    },
+    "raster_cells_with_data": 542543,
+    "independent_random_numeric_samples": 5000,
+    "numeric_mismatches": [],
+    "boundary_samples_without_unique_source": 0
+  },
+  "tiles": {
+    "mapbox-guided": {
+      "tiles": 246,
+      "per_zoom": {
+        "8": 4,
+        "9": 6,
+        "10": 15,
+        "11": 50,
+        "12": 171
+      },
+      "all_CRC_and_dimensions_valid": true,
+      "alpha_values": {
+        "255": 16121856
+      },
+      "opaque_RGB_count": null,
+      "opaque_RGB_top10": null
+    },
+    "pm25-guided": {
+      "tiles": 246,
+      "per_zoom": {
+        "8": 4,
+        "9": 6,
+        "10": 15,
+        "11": 50,
+        "12": 171
+      },
+      "all_CRC_and_dimensions_valid": true,
+      "alpha_values": {
+        "0": 9571017,
+        "255": 6550839
+      },
+      "opaque_RGB_count": null,
+      "opaque_RGB_top10": null
+    },
+    "mapbox-independent": {
+      "tiles": 96,
+      "per_zoom": {
+        "8": 2,
+        "9": 4,
+        "10": 4,
+        "11": 6,
+        "12": 20,
+        "13": 60
+      },
+      "all_CRC_and_dimensions_valid": true,
+      "alpha_values": {
+        "255": 6291456
+      },
+      "opaque_RGB_count": null,
+      "opaque_RGB_top10": null
+    },
+    "canopy-2021": {
+      "tiles": 96,
+      "per_zoom": {
+        "8": 2,
+        "9": 4,
+        "10": 4,
+        "11": 6,
+        "12": 20,
+        "13": 60
+      },
+      "all_CRC_and_dimensions_valid": true,
+      "alpha_values": {
+        "0": 4545624,
+        "255": 1745832
+      },
+      "opaque_RGB_count": 5,
+      "opaque_RGB_top10": [
+        [
+          "(116, 196, 118)",
+          603747
+        ],
+        [
+          "(49, 163, 84)",
+          391865
+        ],
+        [
+          "(0, 109, 44)",
+          315305
+        ],
+        [
+          "(186, 228, 179)",
+          262819
+        ],
+        [
+          "(237, 248, 233)",
+          172096
+        ]
+      ]
+    }
+  }
+}

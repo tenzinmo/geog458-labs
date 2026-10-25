@@ -1,6 +1,6 @@
 <h1 style="color:#000000">Lab 3 technical checklist</h1>
 
-Mo RiGesefal · October 23, 2026. Due October 26, 2026 at 11:59 p.m. Pacific; November 5 is the availability date, not an extension.
+Mo RiGesefal · October 24, 2026. Due October 26, 2026 at 11:59 p.m. Pacific; November 5 is the availability date, not an extension.
 
 | Requirement | Local result | Evidence |
 |---|---|---|
@@ -9,13 +9,15 @@ Mo RiGesefal · October 23, 2026. Due October 26, 2026 at 11:59 p.m. Pacific; No
 | Guided basemap pyramid | Complete: 246 opaque 256 px XYZ PNGs; bounds −122.75/47.10/−122.05/48.15, zooms 8–12 | [Basemap validation](qa/basemap-export.json) |
 | Guided IDW | Complete: EPSG:32610, power 2, requested 250 m; actual 249.7964 × 249.7285 m; all 52,245 cells independently checked | [Numerical validation](qa/guided-idw-numeric-check.json) |
 | Guided thematic pyramid | Complete: 246 separate transparent PNGs, zooms 8–12; matching continuous ramp | [Build evidence](qa/guided-build-manifest.json) |
-| Independent sources and raster | Complete: 479 block groups, 512 parks; land-area denominator, dates, 20 m raster and limits retained | [Processing](qa/processing.json), [denominator check](qa/denominator-validation.json) |
-| Independent thematic pyramid | Complete: 96 transparent PNGs, zooms 8–13; integrity, XYZ coverage and numerical checks | [Raster/tile validation](qa/validation.json) |
+| Independent sources and raster | Complete: 479 denominators, 512 joins (482 matched, 30 null), 5,000 fresh raster samples; dates, 20 m grid and limits retained | [Processing](qa/processing.json), [denominator check](qa/denominator-validation.json) |
+| Independent thematic pyramid | Complete: 96 transparent PNGs, zooms 8–13; integrity, XYZ coverage and numerical checks | [Current data audit](qa/2026-10-24-independent-audit.json) |
 | Independent Studio design | Published and verified: water #dfe8ec, land #f6f5ef | [Published style](source/mapbox-independent-style.json) |
 | Independent basemap pyramid | Complete: 96 opaque 256 px XYZ PNGs; bounds −122.46/47.48/−122.22/47.75, zooms 8–13 | [Basemap validation](qa/basemap-export.json) |
-| Both complete maps | Local pass: basemap alignment/colors/contrast, actual requests, selectors, source-value popups, toggles, reset and no JavaScript warnings/errors | [Complete-map browser review](qa/complete-map-browser-review.json) |
-| Layout and screenshots | Desktop and 390 × 844 iframe inspected; attribution visible and popups close; black headings; six complete-map screenshots linked | [README](README.md); no physical-phone test claimed |
+| Both complete maps | Local pass: basemap alignment/colors/contrast, actual requests, selectors, source-value popups, toggles, reset and no JavaScript warnings/errors | [Current browser review](qa/2026-10-24-browser-review.json) |
+| Layout and screenshots | 1280 × 720, 390 × 844, 320 × 568 and 844 × 390 browser viewports checked; bounded/scrollable popups, attribution, black headings and screenshots | [README](README.md); no physical-phone test claimed |
 | Documentation and attribution | Purpose, audience, sources, methods, extents/zoom, legends, dates/units, estimates versus measurements and attribution retained | [README](README.md), [independent methods](README-independent.md) |
 | Four separate pyramids | Complete: 246 + 246 + 96 + 96 = 684 PNGs; basemaps and themes remain separate | [Export evidence](qa/basemap-export.json) and thematic validation above |
-| Repository and both Pages URLs | URLs listed; deployment and remote verification recorded separately | [Repository and map links](README.md) |
+| Repository and both Pages URLs | Repository and both pages published; final refresh and full-file readback recorded separately | [Repository and map links](README.md) |
 | Canvas submission | Pending | Submit repository and both map URLs; verify attempt, timestamp and exact submitted links |
+
+The [QA index](qa/README.md) identifies current evidence and preserves earlier build-stage records. Their historical incomplete flags are superseded by current checks; Canvas submission remains pending.

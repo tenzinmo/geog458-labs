@@ -1,0 +1,8 @@
+{
+  "test": "Random interior opaque z13 tile pixel coordinates transformed from XYZ/WebMercator to original UTM numeric raster; require a uniform 5x5 numeric neighborhood before comparison",
+  "matched_samples": 5391,
+  "checked_samples": 5391,
+  "boundary_exclusions": 2461,
+  "errors": [],
+  "pass": true
+}

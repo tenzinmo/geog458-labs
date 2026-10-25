@@ -8,8 +8,8 @@
   <style>
     * { box-sizing:border-box; }
     body { margin:0; color:#253137; font:15px/1.5 Arial,sans-serif; background:#f5f5ef; }
-    main { display:grid; grid-template-columns:320px 1fr; height:100dvh; min-height:650px; }
-    #panel { padding:24px 22px; overflow:auto; border-right:1px solid #d6dcd9; z-index:1; }
+    main { display:grid; grid-template-columns:320px minmax(0,1fr); grid-template-rows:minmax(0,1fr); height:100dvh; min-height:0; }
+    #panel { padding:24px 22px; min-height:0; overflow:auto; border-right:1px solid #d6dcd9; z-index:1; }
     h1,h2,h3,h4,h5,h6 { color:#000000; }
     h1 { font-size:26px; line-height:1.15; margin:6px 0 14px; }
     h2 { font-size:15px; margin:18px 0 6px; }
@@ -17,7 +17,7 @@
     .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
     .small { font-size:12px; }
     .rule { border-top:1px solid #ccd5d3; margin:18px 0; }
-    #map { position:relative; min-width:0; min-height:620px; }
+    #map { position:relative; min-width:0; min-height:0; }
     #status { font-size:12px; border-left:3px solid #b76b15; padding-left:10px; }
     label { display:block; margin:8px 0; }
     input { accent-color:#18364d; }
@@ -29,10 +29,12 @@
     .dot { width:12px; height:12px; flex:none; border-radius:50%; background:#18364d; border:2px solid #fff; box-shadow:0 0 0 1px #18364d; margin:0 5px; }
     a { color:#26555f; text-underline-offset:2px; }
     summary { cursor:pointer; font-weight:bold; color:#000; }
-    .maplibregl-popup-content { font:13px/1.5 Arial,sans-serif; padding:14px; }
+    .maplibregl-popup-content { font:13px/1.5 Arial,sans-serif; padding:28px 14px 12px; max-height:var(--popup-content-height,360px); overflow:hidden; }
+    .popup-body { max-height:calc(var(--popup-content-height,360px) - 40px); overflow-y:auto; overscroll-behavior:contain; }
+    .maplibregl-popup-close-button { width:28px; height:28px; background:#fff; color:#253137; z-index:1; }
     .maplibregl-popup-content h2 { margin:0 0 7px; }
     @media(max-width:680px) {
-      main { grid-template-columns:1fr; grid-template-rows:minmax(180px,26dvh) minmax(620px,1fr); min-height:800px; }
+      main { grid-template-columns:1fr; grid-template-rows:minmax(0,26dvh) minmax(0,1fr); }
       #panel { padding:14px 18px; border-right:0; border-bottom:1px solid #d6dcd9; }
       h1 { font-size:22px; }
     }
@@ -73,20 +75,28 @@
   <div id="map" aria-label="Interactive Puget Sound PM2.5 map"></div>
 </main>
 <script type="module">
-  import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
   const status=document.getElementById('status');
+  async function initializeMap() {
+  let maplibregl;
+  try {
+    maplibregl=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');
+  } catch(error) {
+    status.textContent='The map library could not load. Check your internet connection, then reload this page.';
+    document.getElementById('reset').disabled=true;
+    console.error(error);return;
+  }
   const studyArea=[[-122.75,47.10],[-122.05,48.15]];
   const mapContainer=document.getElementById('map');
   function overviewPadding() {
     const size=mapContainer.getBoundingClientRect();
     const inset=Math.max(18,Math.min(40,Math.min(size.width,size.height)*0.06));
     // Reserve room for the wrapped attribution on narrow screens.
-    return {top:inset,bottom:inset+(size.width<=680?100:0),left:inset,right:inset};
+    return {top:inset,bottom:inset+(size.width<=680?Math.min(100,size.height*0.18):0),left:inset,right:inset};
   }
   const map=new maplibregl.Map({
     container:'map',
     style:{version:8,sources:{},layers:[{id:'background',type:'background',paint:{'background-color':'#edf1f0'}}]},
-    bounds:studyArea,fitBoundsOptions:{padding:overviewPadding(),duration:0},minZoom:8,maxZoom:12
+    bounds:studyArea,fitBoundsOptions:{padding:overviewPadding(),duration:0},minZoom:7,maxZoom:12
   });
   map.addControl(new maplibregl.NavigationControl());
   map.addControl(new maplibregl.ScaleControl({unit:'metric'}));
@@ -96,16 +106,29 @@
   function showStudyArea(duration=0) {
     overviewActive=true;map.fitBounds(studyArea,{padding:overviewPadding(),duration});
   }
-  map.on('resize',()=>{if(overviewActive)showStudyArea(0);});
+  map.on('resize',()=>{if(overviewActive)showStudyArea(0);else if(popup?.isOpen())focusPopup(0);});
   map.on('dragstart',()=>{overviewActive=false;});
   map.on('zoomstart',event=>{if(event.originalEvent)overviewActive=false;});
   map.on('error',event=>{
     loadError=true;status.textContent='A local map resource did not load. Check the PNG and GeoJSON paths before using this map.';
     console.error(event.error);
   });
-  function showStation(feature) {
+  function focusPopup(duration=450,zoom=map.getZoom()) {
+    const size=mapContainer.getBoundingClientRect();
+    const attribution=mapContainer.querySelector('.maplibregl-ctrl-bottom-right');
+    const reserve=Math.max(30,(attribution?.getBoundingClientRect().height||0)+12);
+    const top=18,bottom=size.height-reserve-16;
+    const maxContentHeight=Math.max(48,bottom-top-20);
+    const element=popup.getElement();
+    element.style.setProperty('--popup-content-height',`${maxContentHeight}px`);
+    popup.setMaxWidth(`${Math.max(120,Math.min(300,size.width-96))}px`);
+    const height=element.getBoundingClientRect().height;
+    const targetY=Math.min(bottom,Math.max(top+height+10,(top+bottom+height)/2));
+    map.easeTo({center:popup.getLngLat(),zoom,padding:0,offset:[0,targetY-size.height/2],duration,essential:false});
+  }
+  function showStation(feature,zoom=map.getZoom()) {
     const station=feature.properties;
-    const box=document.createElement('div');
+    const box=document.createElement('div');box.className='popup-body';box.tabIndex=0;
     const heading=document.createElement('h2');heading.textContent=station.station_name;box.append(heading);
     for(const text of [
       `Measured PM2.5: ${Number(station.pm25).toFixed(1)} ${station.units}`,
@@ -115,7 +138,10 @@
       'The colored surface estimates values between monitors; this point retains the measured observation.'
     ]) { const paragraph=document.createElement('p');paragraph.textContent=text;box.append(paragraph); }
     if(popup)popup.remove();
-    popup=new maplibregl.Popup({maxWidth:'300px'}).setLngLat(feature.geometry.coordinates).setDOMContent(box).addTo(map);
+    overviewActive=false;
+    popup=new maplibregl.Popup({maxWidth:'300px',anchor:'bottom',offset:[0,-10],focusAfterOpen:false}).setLngLat(feature.geometry.coordinates).setDOMContent(box).addTo(map);
+    focusPopup(450,zoom);
+    popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
   }
   async function available(path) {
     try { return (await fetch(path,{method:'HEAD'})).ok; } catch { return false; }
@@ -168,7 +194,7 @@
         if(select.value==='')return;
         const feature=features[Number(select.value)];overviewActive=false;
         document.getElementById('show-stations').checked=true;map.setLayoutProperty('stations','visibility','visible');
-        map.flyTo({center:feature.geometry.coordinates,zoom:11.5});showStation(feature);
+        showStation(feature,11.5);
       });
     } catch(error) { missing.push('the original station observations');console.error(error); }
     document.getElementById('show-surface').addEventListener('change',event=>{
@@ -185,6 +211,12 @@
   });
   document.getElementById('reset').addEventListener('click',()=>{
     if(popup)popup.remove();document.getElementById('station-select').value='';showStudyArea(500);
+  });
+  }
+  initializeMap().catch(error=>{
+    status.textContent='The interactive map could not start. Check that your browser supports WebGL, then reload.';
+    document.querySelectorAll('#panel select,#panel input,#panel button').forEach(control=>control.disabled=true);
+    console.error(error);
   });
 </script>
 </body>
