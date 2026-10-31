@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Final design selected after controlled radius and intensity trials, 2026-10-27. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 4 — Pokemon GO at UW Seattle</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+  <!-- jQuery must load before the body script uses $. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+  <script src="https://npmcdn.com/csv2geojson@latest/csv2geojson.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    h1, h2, h3, h4, h5, h6 { color: #000000 !important; }
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #242129; }
+    #map { position: absolute; inset: 0; width: 100%; }
+    .panel { position: absolute; top: 18px; left: 18px; width: 300px;
+      max-width: calc(100vw - 82px); max-height: calc(100dvh - 100px);
+      overflow: auto; padding: 16px; background: #fff;
+      border: 1px solid #e6e3e8; border-radius: 8px;
+      box-shadow: 0 2px 12px #21152d1a; }
+    h1 { font-size: 20px; line-height: 1.25; margin: 0 0 12px; font-weight: 700; }
+    p, #status, #mode-label { font-size: 13px; line-height: 1.45; }
+    p { margin: 10px 0 0; }
+    .view-controls { display: flex; gap: 6px; }
+    button { padding: 9px 12px; min-height: 40px; font: inherit; font-size: 13px;
+      border: 1px solid #bcb3c7; border-radius: 5px;
+      background: white; color: #49305e; cursor: pointer; }
+    button[aria-pressed="true"] { background: #59358c; border-color: #59358c; color: white; }
+    button:disabled { opacity: .45; cursor: wait; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #9e9ac8; outline-offset: 3px; }
+    #mode-label { margin-top: 12px; }
+    #status { margin-top: 10px; font-weight: 600; }
+    .context, .source { color: #57515e; }
+    .source a, .mapboxgl-popup-content a { color: #59358c; }
+    .density-legend { margin-top: 10px; }
+    .density-legend[hidden] { display: none; }
+    .density-ramp { height: 7px; border-radius: 3px;
+      background: linear-gradient(to right, #f2f0f7, #dadaeb 20%, #bcbddc 40%, #9e9ac8 60%, #756bb1 80%, #54278f); }
+    .density-labels { display: flex; justify-content: space-between;
+      font-size: 11px; line-height: 1.5; margin-top: 3px; color: #57515e; }
+    .mapboxgl-popup { max-width: min(440px, calc(100vw - 36px)) !important; }
+    .mapboxgl-popup-content { padding: 14px; font-family: Arial, sans-serif;
+      max-height: calc(50dvh - 28px); overflow-y: auto; }
+    .encounter-picker { display: block; margin-bottom: 10px; font-size: 12px; }
+    .encounter-picker select { display: block; width: 100%; max-width: 400px;
+      margin-top: 5px; min-height: 36px; font: inherit; color: #242129; background: #fff; }
+    .popup-image { display: block; width: 400px;
+      max-width: 100%; height: min(30vh, 300px);
+      object-fit: contain; margin-top: 8px; }
+    @media (max-width: 480px) {
+      .panel { top: 12px; left: 12px; max-width: calc(100vw - 68px); padding: 14px; }
+      h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map" aria-label="Map of Pokemon encounters"></div>
+  <aside class="panel" aria-label="Map information and view controls">
+    <h1>Pokémon GO at UW Seattle</h1>
+    <div class="view-controls" role="group" aria-label="Map view">
+      <button type="button" data-view="points" aria-pressed="true" disabled>Points</button>
+      <button type="button" data-view="heatmap" aria-pressed="false" disabled>Heatmap</button>
+    </div>
+    <div id="mode-label"></div>
+    <div id="density-legend" class="density-legend" aria-label="Relative encounter density, low to high" hidden>
+      <div class="density-ramp" aria-hidden="true"></div>
+      <div class="density-labels"><span>Low</span><span>High</span></div>
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+    <p class="context">Class observations reflect uneven collection effort and are not a complete campus survey.</p>
+    <p class="source">Source: <a href="https://docs.google.com/spreadsheets/d/12rOwVWdC0tXeS-peDuKQ7i9CtUEMnC1QoVJ3QZcZMu8/edit?usp=sharing" target="_blank" rel="noopener">Class Google Sheet</a></p>
+  </aside>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      projection: 'globe',
+      center: [-122.3078, 47.6553],
+      zoom: 14,
+      minZoom: 10,
+      maxZoom: 19
+    });
+
+    const status = document.getElementById('status');
+    let mapLoaded = false;
+    // Register before requesting CSV so either resource may finish first.
+    const mapReady = new Promise(function (resolve) {
+      map.once('load', function () {
+        mapLoaded = true;
+        resolve();
+      });
+    });
+    map.on('error', function (event) {
+      console.error('Map loading error:', event.error);
+      if (!mapLoaded) {
+        status.textContent = 'The campus map could not load. Check your connection and reload.';
+      }
+    });
+    map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new mapboxgl.NavigationControl());
+    document.getElementById('mode-label').textContent =
+      'One dot represents one encounter. Select a point for its name and photo.';
+    status.textContent = 'Loading campus map and class observations…';
+
+    $(document).ready(function () {
+      $.ajax({
+        type: 'GET',
+        url: 'https://docs.google.com/spreadsheets/d/12rOwVWdC0tXeS-peDuKQ7i9CtUEMnC1QoVJ3QZcZMu8/gviz/tq?tqx=out:csv&sheet=Sheet1',
+        dataType: 'text',
+        success: function (csvData) { makeGeoJSON(csvData); },
+        error: function () {
+          document.getElementById('status').textContent =
+            'Could not read the class sheet. Check its URL and read access.';
+        }
+      });
+    });
+    function makeGeoJSON(csvData) {
+      function coordinate(value, limit) {
+        const text = String(value == null ? '' : value).trim();
+        if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(text)) return null;
+        const number = Number(text);
+        return Number.isFinite(number) && Math.abs(number) <= limit ? number : null;
+      }
+      try {
+        const rows = csv2geojson.csv(csvData);
+        if (!rows.columns.includes('Latitude') || !rows.columns.includes('Longitude')) {
+          throw new Error('The class sheet is missing its Latitude or Longitude header.');
+        }
+        let skippedRows = 0;
+        const validRows = rows.filter(function (row) {
+          const latitude = coordinate(row.Latitude, 90);
+          const longitude = coordinate(row.Longitude, 180);
+          if (latitude === null || longitude === null) {
+            skippedRows += 1;
+            return false;
+          }
+          row.Latitude = latitude;
+          row.Longitude = longitude;
+          return true;
+        });
+        csv2geojson.csv2geojson(validRows, {
+          latfield: 'Latitude',
+          lonfield: 'Longitude',
+          delimiter: ','
+        }, function (err, data) {
+          const validCollection = data && data.type === 'FeatureCollection' &&
+            Array.isArray(data.features) && data.features.length === validRows.length &&
+            data.features.every(function (feature) {
+              const geometry = feature.geometry;
+              return feature.type === 'Feature' && geometry && geometry.type === 'Point' &&
+                Array.isArray(geometry.coordinates) && geometry.coordinates.length === 2 &&
+                geometry.coordinates.every(Number.isFinite) &&
+                Math.abs(geometry.coordinates[0]) <= 180 && Math.abs(geometry.coordinates[1]) <= 90;
+            });
+          if (err || !validCollection) {
+            console.error('Unexpected class-data conversion error:', err || data);
+            status.textContent = 'The class observations could not be converted. Check the sheet and reload.';
+            return;
+          }
+          // Both views use all rows with valid coordinates, regardless of year or location.
+          mapReady.then(function () {
+            addPokemonLayers(data, skippedRows);
+          }).catch(function (error) {
+            console.error(error);
+            status.textContent = 'Class observations loaded, but the map could not display them. Reload to try again.';
+          });
+        });
+      } catch (error) {
+        console.error(error);
+        status.textContent = 'The class observations could not be read. Check the sheet headers and reload.';
+      }
+    }
+
+    function addPokemonLayers(data, skippedRows) {
+      map.addSource('pokemon', { type: 'geojson', data: data });
+      // Place the heatmap below text labels to keep campus names legible.
+      const firstTextLabel = map.getStyle().layers.find(function (layer) {
+        return layer.type === 'symbol' && layer.layout && layer.layout['text-field'];
+      });
+      map.addLayer({
+        id: 'pokemon-heat',
+        type: 'heatmap',
+        source: 'pokemon',
+        layout: { visibility: 'none' },
+        paint: {
+          // No DBH weighting: the default weight is 1 per encounter.
+          'heatmap-intensity': 0.75,
+          'heatmap-radius': 10,
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(242,240,247,0)',
+            0.2, '#dadaeb',
+            0.4, '#bcbddc',
+            0.6, '#9e9ac8',
+            0.8, '#756bb1',
+            1, '#54278f'
+          ],
+          'heatmap-opacity': 0.85
+        }
+      }, firstTextLabel && firstTextLabel.id);
+      map.addLayer({
+        id: 'pokemon-points',
+        type: 'circle',
+        source: 'pokemon',
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#59358c',
+          'circle-stroke-color': 'white',
+          'circle-stroke-width': 1
+        }
+      });
+      map.on('mouseenter', 'pokemon-points', function () {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'pokemon-points', function () {
+        map.getCanvas().style.cursor = '';
+      });
+      map.on('click', 'pokemon-points', function (event) {
+        // Nearby or coincident records must each remain available without moving their coordinates.
+        const seen = new Set();
+        const features = event.features.filter(function (feature) {
+          const key = JSON.stringify([feature.geometry.coordinates, feature.properties]);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        const content = document.createElement('div');
+        const detail = document.createElement('div');
+        const popup = new mapboxgl.Popup({ maxWidth: '440px', anchor: 'top', offset: 10 });
+        if (features.length > 1) {
+          const label = document.createElement('label');
+          label.className = 'encounter-picker';
+          label.appendChild(document.createTextNode(features.length + ' overlapping encounters'));
+          const picker = document.createElement('select');
+          picker.setAttribute('aria-label', 'Choose an overlapping encounter');
+          features.forEach(function (feature, index) {
+            const option = document.createElement('option');
+            option.value = String(index);
+            option.textContent = String(feature.properties['Pokemon'] || 'Unnamed encounter') +
+              (feature.properties['Your_Name'] ? ' — ' + feature.properties['Your_Name'] : '');
+            picker.appendChild(option);
+          });
+          picker.addEventListener('change', function () { showEncounter(features[Number(picker.value)]); });
+          label.appendChild(picker);
+          content.appendChild(label);
+        }
+        content.appendChild(detail);
+
+        function showEncounter(feature) {
+          detail.replaceChildren();
+          const name = document.createElement('strong');
+          name.textContent = String(feature.properties['Pokemon'] || 'Unnamed encounter');
+          detail.appendChild(name);
+
+          const message = document.createElement('p');
+          message.setAttribute('role', 'status');
+          const rawUrl = String(feature.properties['Image_Link'] || '').trim();
+          let imageUrl;
+          try {
+            imageUrl = new URL(rawUrl);
+            if (!['https:', 'http:'].includes(imageUrl.protocol)) throw new Error('Unsupported image URL');
+          } catch (_) {
+            message.textContent = 'This row has no valid HTTP or HTTPS image link.';
+            detail.appendChild(message);
+          }
+          if (imageUrl && ['https:', 'http:'].includes(imageUrl.protocol)) {
+            const link = document.createElement('a');
+            link.href = imageUrl.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = 'Open encounter image';
+            link.style.display = 'block';
+            link.style.marginTop = '8px';
+            const photo = document.createElement('img');
+            photo.className = 'popup-image';
+            photo.alt = String(feature.properties['Pokemon'] || 'Pokemon') + ' encounter';
+            photo.addEventListener('error', function () {
+              photo.hidden = true;
+              photo.style.display = 'none';
+              message.textContent = 'The photo could not load from this row’s Image_Link. Open the source link to check it.';
+              if (!message.parentNode) detail.appendChild(message);
+            });
+            photo.src = imageUrl.href;
+            link.appendChild(photo);
+            detail.appendChild(link);
+          }
+          popup.setLngLat(feature.geometry.coordinates);
+          // Center the chosen point so its large photo popup fits even on a narrow screen.
+          map.easeTo({ center: feature.geometry.coordinates, duration: 250 });
+        }
+        showEncounter(features[0]);
+        popup.setDOMContent(content).addTo(map);
+      });
+
+      document.querySelectorAll('[data-view]').forEach(function (button) {
+        button.disabled = false;
+        button.addEventListener('click', function () {
+          const showPoints = button.dataset.view === 'points';
+          map.setLayoutProperty('pokemon-points', 'visibility', showPoints ? 'visible' : 'none');
+          map.setLayoutProperty('pokemon-heat', 'visibility', showPoints ? 'none' : 'visible');
+          document.querySelectorAll('[data-view]').forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b === button));
+          });
+          document.getElementById('density-legend').hidden = showPoints;
+          document.getElementById('mode-label').textContent = showPoints
+            ? 'One dot represents one encounter. Select a point for its name and photo.'
+            : 'Relative encounter density. Every encounter has equal weight.';
+        });
+      });
+
+      status.textContent = data.features.length + ' encounters loaded.' +
+        (skippedRows ? ' ' + skippedRows + (skippedRows === 1 ? ' row without valid coordinates is' :
+          ' rows without valid coordinates are') + ' not shown.' : '') +
+        ' Reload for the latest observations.';
+    }
+  </script>
+</body>
+</html>

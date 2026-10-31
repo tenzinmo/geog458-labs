@@ -2,6 +2,12 @@
 
 Course web maps by Mo RiGesefal.
 
+<h2 style="color:#000000">Lab 4: Data collection and visualizing density</h2>
+
+- [Pittsburgh trees](https://tenzinmo.github.io/geog458-labs/lab4/lab4-1.html)
+- [UW Pokémon encounters](https://tenzinmo.github.io/geog458-labs/lab4/lab4-2.html)
+- [Lab 4 data and selected settings](lab4/README.md)
+
 <h2 style="color:#000000">Lab 3: Basemap design and tile generation</h2>
 
 - [Puget Sound PM2.5 — guided map](https://tenzinmo.github.io/geog458-labs/lab3/morigesefal_lab3-1.html)

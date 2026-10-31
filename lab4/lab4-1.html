@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Selected design: radius 8 px, intensity 0.5. Assigned Canvas dataset verified 2026-10-30. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 4 — Pittsburgh street trees</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    h1, h2, h3, h4, h5, h6 { color: #000000 !important; }
+    body { margin: 0; color: #000; font-family: Arial, sans-serif; }
+    #map { position: absolute; inset: 0; width: 100%; }
+    .map-panel { position: absolute; top: 18px; left: 18px; width: 310px;
+      max-width: calc(100% - 88px); max-height: calc(100% - 88px); overflow-y: auto;
+      padding: 16px; background: rgba(255,255,255,.96); color: #000;
+      border-radius: 5px; box-shadow: 0 2px 12px #0002; }
+    h1 { margin: 0 0 4px; font-size: 21px; line-height: 1.15; }
+    .subtitle { margin: 0 0 15px; font-size: 13px; line-height: 1.4; color: #45413b; }
+    #tree-status, #tree-mode { margin: 9px 0; font-size: 12px; line-height: 1.4; }
+    .legend { margin-top: 13px; }
+    .legend-title { margin: 0 0 7px; font-size: 12px; line-height: 1.35; }
+    .legend-ramp { height: 9px; border-radius: 2px;
+      background: linear-gradient(to right, #fff7bc, #fee391, #fec44f, #fe9929, #d95f0e, #993404); }
+    .legend-labels { display: flex; justify-content: space-between; margin-top: 4px;
+      font-size: 11px; }
+    .source { margin: 13px 0 0; font-size: 11px; line-height: 1.4; }
+    .source a { color: #54331c; text-underline-offset: 2px; }
+    .mapboxgl-popup-content { color: #000; font: 14px/1.4 Arial, sans-serif; }
+    @media (max-width: 480px) {
+      .map-panel { top: 14px; left: 14px; padding: 13px; width: 292px; }
+      h1 { font-size: 19px; }
+      .subtitle { margin-bottom: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map" aria-label="Map of Pittsburgh street trees"></div>
+  <aside class="map-panel" aria-label="Tree map information">
+    <h1>Pittsburgh street trees</h1>
+    <p class="subtitle">Size-weighted observations</p>
+    <div id="tree-legend" class="legend" aria-label="Relative DBH-weighted concentration, low to high">
+      <p class="legend-title">Relative DBH-weighted concentration</p>
+      <div class="legend-ramp" aria-hidden="true"></div>
+      <div class="legend-labels"><span>Low</span><span>High</span></div>
+    </div>
+    <p id="tree-mode">Zoom in to inspect individual trees and their DBH.</p>
+    <p id="tree-status" role="status" aria-live="polite">Loading tree records…</p>
+    <p class="source">Source: <a href="https://canvas.uw.edu/courses/1918791/files/152783027?wrap=1" target="_blank" rel="noopener noreferrer">Assigned Pittsburgh tree dataset</a></p>
+  </aside>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      projection: 'globe',
+      center: [-79.999732, 40.4374],
+      zoom: 11,
+      maxZoom: 15
+    });
+
+    map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new mapboxgl.NavigationControl());
+    let treeCount = null;
+    let dataReady = false;
+    let loadError = '';
+
+    function updatePanel() {
+      const zoom = map.getZoom();
+      document.getElementById('tree-legend').hidden = zoom >= 15;
+      document.getElementById('tree-mode').textContent = zoom >= 15
+        ? 'Tree circles: click a tree to view its DBH.'
+        : zoom >= 14
+          ? 'Density fades into individual tree circles between zoom 14 and 15.'
+          : 'Zoom in to inspect individual trees and their DBH.';
+      document.getElementById('tree-status').textContent = loadError ||
+        (dataReady
+          ? treeCount.toLocaleString('en-US') + ' tree records loaded · Zoom ' + zoom.toFixed(1)
+          : treeCount === null
+            ? 'Loading tree records… · Zoom ' + zoom.toFixed(1)
+            : 'Rendering ' + treeCount.toLocaleString('en-US') + ' tree records…');
+    }
+    map.on('zoomend', updatePanel);
+    updatePanel();
+
+    map.on('load', async () => {
+      try {
+        // Assigned Canvas file; byte-identical to the dataset used in the recorded trials.
+        const response = await fetch('data/trees.geojson');
+        if (!response.ok) throw new Error('Tree request failed: ' + response.status);
+        const trees = await response.json();
+        if (trees.type !== 'FeatureCollection' || !Array.isArray(trees.features)) {
+          throw new Error('Tree data is not a GeoJSON FeatureCollection.');
+        }
+        treeCount = trees.features.length;
+        updatePanel();
+        map.setFog({});
+        map.addSource('trees', { type: 'geojson', data: trees });
+        const firstTextLayer = map.getStyle().layers.find(layer =>
+          layer.type === 'symbol' && layer.layout && layer.layout['text-field']);
+        const beforeLabels = firstTextLayer ? firstTextLayer.id : undefined;
+
+        // Fixed comparison values selected at the initial center and zoom 11.
+        // Original baseline: radius [[11,15],[15,20]], intensity [[11,1],[15,3]].
+        map.addLayer({
+          'id': 'trees-heat',
+          'type': 'heatmap',
+          'source': 'trees',
+          'maxzoom': 15,
+          'paint': {
+            'heatmap-weight': {
+              'property': 'dbh',
+              'type': 'exponential',
+              'stops': [[1, 0], [62, 1]]
+            },
+            'heatmap-intensity': 0.5,
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(255,247,188,0)',
+              0.2, '#fee391',
+              0.4, '#fec44f',
+              0.6, '#fe9929',
+              0.8, '#d95f0e',
+              1, '#993404'
+            ],
+            'heatmap-radius': 8,
+            'heatmap-opacity': {
+              'default': 1,
+              'stops': [[14, 1], [15, 0]]
+            }
+          }
+        }, beforeLabels);
+        map.addLayer({
+          'id': 'trees-point',
+          'type': 'circle',
+          'source': 'trees',
+          'minzoom': 14,
+          'paint': {
+            'circle-radius': {
+              'property': 'dbh',
+              'type': 'exponential',
+              'stops': [
+                [{ 'zoom': 15, 'value': 1 }, 5],
+                [{ 'zoom': 15, 'value': 62 }, 10],
+                [{ 'zoom': 22, 'value': 1 }, 20],
+                [{ 'zoom': 22, 'value': 62 }, 50]
+              ]
+            },
+            'circle-color': {
+              'property': 'dbh',
+              'type': 'exponential',
+              'stops': [
+                [0, 'rgba(255,247,188,0)'],
+                [10, '#fff7bc'],
+                [20, '#fee391'],
+                [30, '#fec44f'],
+                [40, '#fe9929'],
+                [50, '#d95f0e'],
+                [60, '#993404']
+              ]
+            },
+            'circle-stroke-color': '#8b5e34',
+            'circle-stroke-width': 1,
+            'circle-stroke-opacity': {
+              'stops': [[14, 0], [15, 1]]
+            },
+            'circle-opacity': {
+              'stops': [[14, 0], [15, 1]]
+            }
+          }
+        }, beforeLabels);
+        map.on('click', 'trees-point', (event) => {
+          const content = document.createElement('div');
+          const label = document.createElement('strong');
+          label.textContent = 'DBH: ';
+          content.appendChild(label);
+          content.appendChild(document.createTextNode(String(event.features[0].properties.dbh)));
+          new mapboxgl.Popup()
+            .setLngLat(event.features[0].geometry.coordinates)
+            .setDOMContent(content)
+            .addTo(map);
+        });
+        map.on('mouseenter', 'trees-point', () => {
+          if (map.getZoom() > 14) map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'trees-point', () => { map.getCanvas().style.cursor = ''; });
+        map.once('idle', () => {
+          dataReady = map.isSourceLoaded('trees');
+          updatePanel();
+        });
+      } catch (error) {
+        console.error(error);
+        loadError = 'Tree data could not load. Reload or check the data connection.';
+        updatePanel();
+      }
+    });
+  </script>
+</body>
+</html>
