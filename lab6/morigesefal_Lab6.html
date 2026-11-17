@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Washington grew | Lab 6</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root{color-scheme:dark;--paper:#151c23;--panel:#202b34;--ink:#edf0ed;--muted:#a8b7c3;--line:#465864;--blue:#9bc3d4;--amber:#e6b777}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:var(--paper);font:15px/1.55 system-ui,sans-serif;display:grid;grid-template-columns:minmax(360px,29%) 1fr}
+aside{height:100vh;overflow:auto;background:var(--paper);padding:28px;border-right:1px solid var(--line);scrollbar-color:var(--line) var(--paper)}
+h1{font:normal 40px/1.07 Georgia,serif;letter-spacing:-1px;margin:15px 0 14px;max-width:360px}h1 span{color:var(--amber)}h2{font-size:17px;line-height:1.3;margin:20px 0 9px}p{margin:9px 0}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;color:var(--muted)}.muted,small{font-size:12px;color:var(--muted)}.intro{font-size:14px;line-height:1.6;max-width:450px}
+#controls{padding-top:5px;border-top:1px solid var(--line)}label{display:block;font-size:12px;font-weight:650;margin:13px 0 6px}input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid #607481;border-radius:3px;background:var(--panel);color:var(--ink)}input::placeholder{color:#b0bec7}
+button{cursor:pointer;border:1px solid #607481;border-radius:3px;padding:8px 11px;background:var(--panel);color:var(--ink)}button:hover{background:#30414e}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid var(--amber);outline-offset:3px}a{color:var(--amber);text-underline-offset:3px}
+#county-filter{position:relative}#county-options{position:absolute;left:0;right:0;top:77px;z-index:4;max-height:220px;overflow:auto;background:var(--panel);border:1px solid #607481;box-shadow:0 10px 24px #0007;padding:4px}#county-options button{display:block;width:100%;border:0;text-align:left;background:transparent;border-radius:0}#county-options button:hover,#county-options button:focus-visible{background:#344b5b}#county-options[hidden]{display:none}
+#search-status{min-height:18px;font-size:12px;color:var(--muted);margin:6px 0}#unpin{font-size:11px;margin-top:4px;padding:6px 10px}#placename{margin:20px 0 2px;font-size:20px}#county-count{font-size:38px;line-height:1.2;letter-spacing:-1px;font-weight:650;margin:7px 0;color:var(--ink);font-variant-numeric:tabular-nums}#growth-summary{font-size:13px;color:var(--blue)}
+#county-chart svg{display:block;width:100%;height:auto}#county-chart text{font-size:11px;fill:#b7c6cf}#county-chart .domain,#county-chart .tick line{stroke:#647887}#annual-data caption{text-align:left;font-weight:650;padding:7px 5px}#annual-data{font-size:12px;width:100%;border-collapse:collapse}td,th{padding:5px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}th:first-child,td:first-child{text-align:left}details{font-size:12px;margin:12px 0}summary{cursor:pointer;color:var(--ink);padding:3px 0}
+.county-comparison{width:100%;table-layout:fixed;border-collapse:collapse;margin:16px 0 20px;font-size:13px}
+.county-comparison caption{text-align:left;color:var(--muted);font-size:12px;padding:0 0 5px}
+.county-comparison th,.county-comparison td{padding:7px 5px;text-align:left;vertical-align:middle}
+.county-comparison thead th{color:var(--muted);font-size:11px;font-weight:550}
+.county-comparison tbody th{width:27%}.county-comparison button{padding:4px 0;border:0;background:transparent;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;font-size:14px;font-weight:600}
+.county-comparison button:hover{color:var(--amber)}.comparison-track{height:4px;margin:4px 0;background:var(--line);border-radius:2px;overflow:hidden}
+.comparison-bar{display:block;height:100%;background:var(--blue)}.comparison-rank{color:var(--muted);font-size:11px}
+footer{margin-top:22px;border-top:1px solid var(--line);padding-top:12px}footer p{line-height:1.65}
+#map-panel{height:100vh;min-width:0;position:relative;background:#11181e}#map{position:absolute;inset:0}#reset-view{position:absolute;top:14px;left:14px;z-index:2;font-size:12px;background:#151c23ed;border-color:#7a909d;box-shadow:0 2px 10px #0004}
+#legend{position:absolute;bottom:42px;right:14px;z-index:2;background:#151c23f5;border:1px solid var(--line);border-radius:4px;padding:14px 16px;max-width:260px;font-size:12px;box-shadow:0 4px 20px #0003}#legend h2{font-size:13px;margin:0 0 10px}.legend-row{display:flex;align-items:center;gap:9px;margin:5px 0}.swatch{width:20px;height:13px;border:1px solid #ffffff38;flex:none}
+.mapboxgl-popup{pointer-events:none}.mapboxgl-popup-content{font:12px/1.7 system-ui,sans-serif;padding:14px 16px;min-width:235px;color:var(--ink);background:var(--paper);border:1px solid #718492;border-radius:4px;box-shadow:0 5px 24px #0007}.popup-name{font-size:15px;font-weight:700;color:var(--amber);margin-bottom:3px}
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip{border-top-color:var(--paper)}.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip{border-bottom-color:var(--paper)}.mapboxgl-popup-anchor-left .mapboxgl-popup-tip{border-right-color:var(--paper)}.mapboxgl-popup-anchor-right .mapboxgl-popup-tip{border-left-color:var(--paper)}
+.mapboxgl-ctrl-attrib{font-size:10px}.mapboxgl-ctrl-group button{color:#17202a}.mapboxgl-ctrl-group button:hover{background:#e2e8eb}#status{font-size:11px;color:var(--muted)}.error{color:#ffb7a4!important}
+@media(max-width:1000px){aside{padding:22px}h1{font-size:35px}}
+@media(max-width:720px){body{display:flex;flex-direction:column}aside{height:auto;padding:23px 20px;border-right:0}#map-panel{height:auto;order:-1}#map{position:relative;height:48vh;min-height:310px}#legend{position:relative;inset:auto;border-radius:0;border-left:0;border-right:0;max-width:none;width:100%;padding:12px 20px;box-shadow:none}#legend-rows{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.legend-row{font-size:11px;align-items:flex-start}#legend-note{margin-bottom:0}#legend h2{font-size:12px}h1{font-size:37px;max-width:340px}#county-chart{max-width:560px}footer{max-width:560px}#reset-view{font-size:11px;top:10px;left:10px}}
+</style>
+</head>
+<body>
+<aside aria-label="Dashboard controls and linked population chart">
+<div class="eyebrow">Washington counties · 2000–2020</div>
+<h1>Where Washington<br><span>grew</span></h1>
+<p class="intro">King added 523,754 people, while Franklin nearly doubled. I’d check whether homebuilding kept pace in both counties.</p>
+<table class="county-comparison">
+<caption>Growth since 2000 · rank among 39 counties</caption>
+<thead><tr><th scope="col">County</th><th scope="col">People added</th><th scope="col">Growth rate</th></tr></thead>
+<tbody>
+<tr><th scope="row"><button id="look-king" aria-label="Show King County on the people added map" disabled>King</button></th><td></td><td></td></tr>
+<tr><th scope="row"><button id="look-franklin" aria-label="Show Franklin County on the growth rate map" disabled>Franklin</button></th><td></td><td></td></tr>
+</tbody></table>
+<div id="controls">
+<label for="indicator">Map indicator</label><select id="indicator" disabled><option value="population">2020 population estimate · people</option><option value="gain">Population change, 2000–2020 · people</option><option value="growth">Population change, 2000–2020 · %</option></select>
+<div id="county-filter"><label for="county-search">Find a county</label><input id="county-search" type="search" placeholder="Try King or son" autocomplete="off" aria-controls="county-options" aria-expanded="false" aria-describedby="search-status" disabled><div id="county-options" role="group" aria-label="County search results" hidden></div><p id="search-status" role="status">Loading counties…</p></div>
+<button id="unpin" type="button" disabled>Unpin county</button>
+</div>
+<div aria-live="polite"><h2 id="placename">Washington</h2><p class="muted">2020 population estimate · <span id="selection-mode">All counties</span></p><p id="county-count">Loading…</p><p id="growth-summary"></p></div>
+<h2>Population, 2000–2020</h2><div id="county-chart"></div><p id="chart-note" class="muted"></p>
+<details><summary>View the annual values</summary><table id="annual-data"><caption id="annual-caption">Annual population</caption><thead><tr><th scope="col">Year</th><th scope="col">Course value · people</th></tr></thead><tbody></tbody></table></details>
+<p class="muted">Hover to preview; click to pin. Use Unpin county to clear a selection.</p>
+<p id="status" role="status">Loading map and county data…</p>
+<footer><p class="muted">Mo RiGesefal · GEOG 458</p><p class="muted">Source: <a href="https://canvas.uw.edu/courses/1918791/files/152783058">course WAcounties.geojson</a>. 2020 values are April 1 population estimates.</p><details><summary>Data and methods</summary><p>Existing supplied file, version field September 16, 2020. Historical values, not a live feed. Current Canvas download byte identity remains unverified.</p><p>All 39 values for 2020 match the estimates in the <a href="https://doh.wa.gov/sites/default/files/2022-02/420-004-CDAnnualReport2020.pdf#page=83">Washington DOH report, p. 80</a>, which cites Washington OFM’s April 1, 2020 Population Trends. The <a href="https://www.portseattle.org/sites/default/files/2022-01/2022%20Limited%20Tax%20General%20Obligation%20and%20Refunding%20Bonds_OS.pdf#page=161">Port of Seattle, Table F-1</a>, also identifies the matching state, King, Pierce and Snohomish figures as April 1 estimates from OFM.</p><p>The estimate total is 7,656,200. The <a href="https://www.census.gov/quickfacts/WA">2020 Census count</a> is 7,705,281. These are different measures.</p><p>The original source and processing history of the course file remain unverified. Earlier county values were not independently verified; its statewide sums for 2001–2009 differ from DOH’s historical table. The chart and percentage change retain the supplied values.</p><p class="muted">Change = 100 × (POP2020 − POP2000) ÷ POP2000, using course-file values. For several counties, values are summed before computing change. Map colors describe each county separately. People added is POP2020 minus POP2000. Each comparison bar uses the largest county value for its measure as the full width. Ranks run from highest to lowest across the 39 counties.</p><p class="muted">Adapted from the <a href="https://canvas.uw.edu/courses/1918791/assignments/11890231">Lab 6 tutorial</a>. The 2020 indicator measures estimated people, not population density.</p><p>This map contains population data, not housing or infrastructure measures.</p><p>Search accepts partial names. Tab through results and press Enter to pin a county. Other counties stay faint for context. Clicking empty map space or the summary also clears a pin.</p></details></footer>
+</aside>
+<main id="map-panel" aria-label="Washington county map"><div id="map"></div><button id="reset-view" type="button">Show Washington</button><section id="legend" aria-label="Map legend"><h2 id="legend-title">2020 population estimate · people</h2><div id="legend-rows"></div><p id="legend-note" class="muted">Five fixed classes</p></section></main>
+<script id="dashboard-core">
+// Shared calculations: one input array supplies every linked view.
+const dashboardCore = (() => {
+  const years = Array.from({length:21},(_,i)=>2000+i);
+  const total = (features,year) => features.reduce((sum,f)=>sum+Number(f.properties['POP'+year]),0);
+  const growth = (start,end) => start>0 ? 100*(end-start)/start : null;
+  const series = features => years.map(year=>({year,population:total(features,year)}));
+  const matching = (features,query) => features.filter(f=>f.properties.NAMELSAD10.toLowerCase().includes(query.trim().toLowerCase()));
+  const input = (matches,hover,pin) => pin ? [pin] : hover ? [hover] : matches;
+  const populationClasses=[{min:-Infinity,color:'#344d60',label:'Under 25,000'},{min:25000,color:'#50788e',label:'25,000–99,999'},{min:100000,color:'#76a3b8',label:'100,000–499,999'},{min:500000,color:'#a0c7d7',label:'500,000–999,999'},{min:1000000,color:'#d1e6ed',label:'1,000,000 or more'}];
+  const growthClasses=[{min:-Infinity,color:'#d8a45c',label:'Below 0% · population loss'},{min:0,color:'#394852',label:'0% to under 10%'},{min:10,color:'#527487',label:'10% to under 25%'},{min:25,color:'#7ca6ba',label:'25% to under 50%'},{min:50,color:'#c0dce8',label:'50% or more'}];
+  const gainClasses = [
+    {min:-Infinity, color:'#d8a45c', label:'Below 0 · population loss'},
+    {min:0, color:'#394852', label:'0–9,999'},
+    {min:10000, color:'#527487', label:'10,000–49,999'},
+    {min:50000, color:'#7ca6ba', label:'50,000–99,999'},
+    {min:100000, color:'#c0dce8', label:'100,000 or more'}
+  ];
+  const colorFor=(value,classes)=>classes.reduce((color,c)=>value>=c.min?c.color:color,classes[0].color);
+  return {years,total,growth,series,matching,input,populationClasses,growthClasses,gainClasses,colorFor};
+})();
+</script>
+<script>
+// Mapbox GL JS 3.7.0 and D3 v7 match the instructor's starter.
+mapboxgl.accessToken='pk.eyJ1IjoibW9vb29uc3RlciIsImEiOiJjbXY0NmozcTkwejEzMnpvZmd5b2FpM2ZpIn0.-lR_bJORKIX0-1Sa1z8nAQ';
+const washingtonBounds=[[-124.85,45.5],[-116.85,49.05]];
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',projection:'mercator',bounds:washingtonBounds,fitBoundsOptions:{padding:36}});
+map.addControl(new mapboxgl.NavigationControl(),'top-right');map.addControl(new mapboxgl.ScaleControl({unit:'metric'}),'bottom-left');
+const el=id=>document.getElementById(id);const format=n=>new Intl.NumberFormat('en-US').format(n);const percent=n=>n===null?'Not available':`${n>0?'+':''}${n.toFixed(2)}%`;
+const showWashington=()=>map.fitBounds(washingtonBounds,{padding:36,duration:0});
+el('reset-view').addEventListener('click',showWashington);
+window.matchMedia('(max-width:720px)').addEventListener('change',()=>{map.resize();showWashington();});
+map.on('error',event=>{el('status').textContent='Map error: check the connection and public token.';el('status').classList.add('error');console.error(event.error);});
+map.on('load',async()=>{try{
+  const data=await d3.json('./WAcounties.geojson');const counties=data.features;
+  if(counties.length!==39)throw new Error('Expected 39 counties in the supplied file.');
+  for(const feature of counties){const p=feature.properties;for(const year of dashboardCore.years){if(!Number.isFinite(p['POP'+year])||p['POP'+year]<0)throw new Error('Missing or invalid population for '+p.NAMELSAD10);}p.GROWTH_PCT=dashboardCore.growth(p.POP2000,p.POP2020);if(p.GROWTH_PCT===null)throw new Error('Missing growth denominator for '+p.NAMELSAD10);}
+  for (const {properties} of counties) {
+    properties.PEOPLE_ADDED = properties.POP2020 - properties.POP2000;
+  }
+  const comparisonMeasures = [
+    {field:'PEOPLE_ADDED', format:value=>d3.format('+,d')(value)},
+    {field:'GROWTH_PCT', format:percent}
+  ];
+  const countyRanks = new Map();
+  for (const {field} of comparisonMeasures) {
+    const ordered = counties.map(county=>county.properties[field]).sort(d3.descending);
+    countyRanks.set(field, {maximum:ordered[0], rank:value=>ordered.indexOf(value) + 1});
+  }
+  function drawComparisonRow(button, county) {
+    const cells = button.closest('tr').querySelectorAll('td');
+    comparisonMeasures.forEach((measure, index)=>{
+      const value = county.properties[measure.field];
+      const scale = countyRanks.get(measure.field);
+      const cell = cells[index];
+      cell.textContent = measure.format(value);
+      const track = document.createElement('div');
+      track.className = 'comparison-track';
+      track.setAttribute('aria-hidden','true');
+      const bar = document.createElement('span');
+      bar.className = 'comparison-bar';
+      bar.style.width = (value / scale.maximum * 100) + '%';
+      track.append(bar);
+      const rank = document.createElement('span');
+      rank.className = 'comparison-rank';
+      rank.textContent = 'Rank ' + scale.rank(value);
+      cell.append(track,rank);
+    });
+  }
+  let matches=counties,hover=null,pin=null;
+  const popup=new mapboxgl.Popup({closeButton:false,closeOnClick:false,maxWidth:'280px'});
+  map.addSource('population',{type:'geojson',data});
+  map.addLayer({id:'county-fill',type:'fill',source:'population',paint:{'fill-color':'#50788e','fill-opacity':0.85}});
+  map.addLayer({id:'county-border',type:'line',source:'population',paint:{'line-color':'#182530','line-width':0.8}});
+  map.addLayer({id:'county-focus',type:'line',source:'population',filter:['==',['get','OBJECTID'],-1],paint:{'line-color':'#f1cd8f','line-width':3}});
+  map.addLayer({
+    id:'comparison-county-labels', type:'symbol', source:'population',
+    filter:['in',['get','NAME10'],['literal',['King','Franklin']]],
+    layout:{'text-field':['get','NAME10'],'text-font':['Open Sans Semibold','Arial Unicode MS Bold'],
+      'text-size':13,'text-letter-spacing':0.04},
+    paint:{'text-color':'#f5f5ee','text-halo-color':'#182530','text-halo-width':1.8}
+  });
+  const svg=d3.select('#county-chart').append('svg').attr('viewBox','0 0 440 260').attr('role','img');const title=svg.append('title');const chart=svg.append('g').attr('transform','translate(60,16)');const width=360,height=200;
+  const x=d3.scaleLinear().domain([2000,2020]).range([0,width]),y=d3.scaleLinear().range([height,0]);
+  chart.append('g').attr('transform',`translate(0,${height})`).call(d3.axisBottom(x).tickValues([2000,2005,2010,2015,2020]).tickFormat(d3.format('d')));
+  const yAxis=chart.append('g'),path=chart.append('path').attr('fill','none').attr('stroke','#9bc3d4').attr('stroke-width',3),dots=chart.append('g');const line=d3.line().x(d=>x(d.year)).y(d=>y(d.population));
+  function areaLabel(features){return !features.length?'No matching counties':features.length===39?'Washington':features.length===1?features[0].properties.NAMELSAD10:`Matching counties (${features.length})`;}
+  function update(){
+    const features=dashboardCore.input(matches,hover,pin),label=areaLabel(features),ids=features.map(f=>f.properties.OBJECTID),focus=['in',['get','OBJECTID'],['literal',ids]];
+    el('placename').textContent=label;el('county-count').textContent=features.length?format(dashboardCore.total(features,2020)):'—';el('selection-mode').textContent=pin?'Pinned county':hover?'Hover preview':features.length===39?'All counties':'Search results';el('unpin').disabled=!pin;
+    el('growth-summary').textContent=features.length?`${percent(dashboardCore.growth(dashboardCore.total(features,2000),dashboardCore.total(features,2020)))} change in course values since 2000`:'';
+    map.setPaintProperty('county-fill','fill-opacity',['case',focus,0.85,0.12]);map.setPaintProperty('county-border','line-opacity',['case',focus,1,0.16]);map.setFilter('county-focus',features.length===39?['==',['get','OBJECTID'],-1]:focus);
+    svg.style('display',features.length?'block':'none');el('chart-note').textContent=features.length?`Course values · counties summed · vertical scale varies.`:'No matches. Clear or change the search.';
+    el('annual-caption').textContent=label+' · annual population';
+    const values=features.length?dashboardCore.series(features):[];
+    d3.select('#annual-data tbody').selectAll('tr').data(values,d=>d.year).join('tr').selectAll('td').data(d=>[d.year,format(d.population)]).join('td').text(d=>d);
+    if(!features.length)return;
+    title.text(`${label} course-file population values, 2000–2020`);svg.attr('aria-label',`${label} course-file annual population values, 2000–2020`);y.domain([0,d3.max(values,d=>d.population)*1.08]).nice();yAxis.call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('~s')));path.datum(values).attr('d',line);
+    dots.selectAll('circle').data(values,d=>d.year).join('circle').attr('r',3).attr('fill','#e6b777').attr('cx',d=>x(d.year)).attr('cy',d=>y(d.population)).selectAll('title').data(d=>[d]).join('title').text(d=>`${d.year}${d.year===2020?" estimate":" course value"}: ${format(d.population)}`);
+  }
+  function setIndicator(){
+    const selector = el('indicator');
+    const indicators = {
+      population:{field:'POP2020', classes:dashboardCore.populationClasses, note:'April 1 estimates · lighter means more people'},
+      gain:{field:'PEOPLE_ADDED', classes:dashboardCore.gainClasses, note:'People added since 2000 · amber indicates loss'},
+      growth:{field:'GROWTH_PCT', classes:dashboardCore.growthClasses, note:'Course values · amber indicates loss'}
+    };
+    const {field,classes,note} = indicators[selector.value];
+    const color = ['step',['get',field],classes[0].color];
+    for (const entry of classes.slice(1)) color.push(entry.min,entry.color);
+    map.setPaintProperty('county-fill','fill-color',color);
+    el('legend-title').textContent = selector.selectedOptions[0].textContent;
+    el('legend-note').textContent = note;
+    const rows=d3.select('#legend-rows').selectAll('.legend-row').data(classes).join('div').attr('class','legend-row');rows.selectAll('.swatch').data(d=>[d]).join('span').attr('class','swatch').style('background',d=>d.color);rows.selectAll('.label').data(d=>[d]).join('span').attr('class','label').text(d=>d.label);
+  }
+  function closeOptions(){el('county-options').hidden=true;el('county-search').setAttribute('aria-expanded','false');}
+  function unpin(){pin=null;hover=null;popup.remove();update();}
+  function renderOptions(){
+    const options=el('county-options');options.replaceChildren();
+    matches.slice().sort((a,b)=>a.properties.NAMELSAD10.localeCompare(b.properties.NAMELSAD10)).forEach(feature=>{const button=document.createElement('button');button.type='button';button.textContent=feature.properties.NAMELSAD10;
+      const preview=()=>{if(pin||hover===feature)return;hover=feature;update();};const end=()=>{if(pin||!hover)return;hover=null;update();};button.addEventListener('mouseenter',preview);button.addEventListener('focus',preview);button.addEventListener('mouseleave',end);button.addEventListener('blur',end);
+      button.addEventListener('click',()=>{pin=feature;hover=null;popup.remove();closeOptions();update();});button.addEventListener('keydown',e=>{if(e.key==='Escape'){closeOptions();hover=null;update();el('county-search').focus();closeOptions();}});options.append(button);});
+    el('search-status').textContent=matches.length?`${matches.length} of 39 counties match.`:'No counties match. Try another name.';if(!matches.length)options.textContent='No counties found';
+  }
+  function openOptions(){renderOptions();el('county-options').hidden=false;el('county-search').setAttribute('aria-expanded','true');}
+  for(const [id,name,indicator] of [['look-franklin','Franklin','growth'],['look-king','King','gain']]){
+    const county = counties.find(feature=>feature.properties.NAME10===name);
+    drawComparisonRow(el(id), county);
+    el(id).disabled=false;el(id).addEventListener('click',event=>{event.stopPropagation();el('county-search').value='';matches=counties;pin=county;hover=null;popup.remove();renderOptions();closeOptions();el('indicator').value=indicator;setIndicator();update();showWashington();el('controls').scrollIntoView({block:'start',behavior:'auto'});});
+  }
+  el('county-search').disabled=false;el('indicator').disabled=false;el('county-search').addEventListener('focus',openOptions);el('county-search').addEventListener('click',openOptions);
+  el('county-search').addEventListener('input',()=>{matches=dashboardCore.matching(counties,el('county-search').value);pin=null;hover=null;popup.remove();openOptions();update();});
+  el('county-search').addEventListener('keydown',event=>{
+    if(event.key==='Escape' && !el('county-options').hidden){
+      event.preventDefault();
+      closeOptions();
+      hover=null;
+      update();
+    }
+  });el('indicator').addEventListener('change',()=>{closeOptions();popup.remove();setIndicator();});el('unpin').addEventListener('click',unpin);
+  map.on('mousemove','county-fill',event=>{const feature=matches.find(f=>f.properties.OBJECTID===event.features[0].properties.OBJECTID)||null;map.getCanvas().style.cursor=feature?'pointer':'';
+    if(feature){const p=feature.properties,content=document.createElement('div');const name=document.createElement('div');name.className='popup-name';name.textContent=p.NAMELSAD10;content.append(name);for(const text of [`2000 course value: ${format(p.POP2000)} people`,`2020 estimate: ${format(p.POP2020)} people`,`People added: ${d3.format('+,d')(p.PEOPLE_ADDED)} (rank ${countyRanks.get('PEOPLE_ADDED').rank(p.PEOPLE_ADDED)} of 39)`,`Growth: ${percent(p.GROWTH_PCT)} (rank ${countyRanks.get('GROWTH_PCT').rank(p.GROWTH_PCT)} of 39)`,pin?'Chart stays on the pinned county.':'Click to pin this county.']){const row=document.createElement('div');row.textContent=text;content.append(row);}popup.setLngLat(event.lngLat).setDOMContent(content).addTo(map);}else popup.remove();
+    if(pin||hover===feature)return;hover=feature;update();});
+  map.on('mouseleave','county-fill',()=>{map.getCanvas().style.cursor='';popup.remove();if(pin||!hover)return;hover=null;update();});
+  map.on('dragstart',()=>popup.remove());
+  map.on('click',event=>{const hit=map.queryRenderedFeatures(event.point,{layers:['county-fill']})[0],feature=hit?matches.find(f=>f.properties.OBJECTID===hit.properties.OBJECTID)||null:null;pin=pin===feature?null:feature;hover=null;popup.remove();closeOptions();update();});
+  document.addEventListener('click',event=>{
+    if(el('controls').contains(event.target))return;
+    closeOptions();
+    // Reading the chart or its data table should preserve the current selection.
+    if(event.target.closest('#map-panel, #county-chart, details'))return;
+    unpin();
+  });
+  setIndicator();renderOptions();update();showWashington();el('status').textContent='39 counties loaded.';
+}catch(error){el('status').textContent='Unable to load dashboard: '+error.message;el('status').classList.add('error');console.error(error);}});
+</script>
+</body>
+</html>
